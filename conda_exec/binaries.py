@@ -5,6 +5,7 @@ from __future__ import annotations
 import stat
 from typing import TYPE_CHECKING
 
+from conda.common.compat import on_win
 from conda.common.path import BIN_DIRECTORY
 
 if TYPE_CHECKING:
@@ -18,8 +19,6 @@ def find_binary(prefix: Path, name: str) -> Path | None:
     ``Scripts/`` on Windows). On Windows, tries ``.exe``, ``.bat``,
     and ``.cmd`` extensions.
     """
-    from conda.common.compat import on_win
-
     bin_dir = prefix / BIN_DIRECTORY
     if not bin_dir.is_dir():
         return None
@@ -44,8 +43,6 @@ def discover_binaries(prefix: Path) -> list[str]:
 
     Looks in the platform-correct bin directory.
     """
-    from conda.common.compat import on_win
-
     bin_dir = prefix / BIN_DIRECTORY
     if not bin_dir.is_dir():
         return []

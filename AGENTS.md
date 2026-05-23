@@ -54,6 +54,12 @@
   clear name and docstring. The underscore-prefix convention creates
   untestable, hard-to-patch indirection without real encapsulation.
 
+- Do not use section header comments (e.g.,
+  `# --------------- section name ---------------`). Well-named
+  functions and clear module structure make them unnecessary. If a
+  file needs section dividers, it should be split into separate
+  modules instead.
+
 ## Typing and linting
 
 - All code must be typed using modern annotations (`str | None` not
@@ -111,9 +117,14 @@
   - `conda.core.envs_manager.unregister_env` for env cleanup
   - `conda.gateways.disk.delete.rm_rf` for safe recursive deletion
   - `conda.exceptions.CondaError` as the base for all plugin errors
+  - `conda.reporters.confirm_yn` for yes/no confirmation prompts
+    (respects `context.always_yes` and `context.dry_run` globally)
+  - `conda.base.context.context` for global settings like
+    `dry_run`, `always_yes`, `json`
 
-  Do not reimplement platform detection, path construction, or
-  config parsing when conda already handles it.
+  Do not reimplement platform detection, path construction,
+  confirmation prompts, or config parsing when conda already
+  handles it.
 
 - The plugin registers via `pluggy` hooks (`conda_subcommands`) and
   the `[project.entry-points.conda]` entry point.
