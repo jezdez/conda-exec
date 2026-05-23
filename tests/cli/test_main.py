@@ -71,14 +71,20 @@ def test_parse_no_refresh_default(parser: ArgumentParser):
 
 
 def test_parse_all_options(parser: ArgumentParser):
-    args = parser.parse_args([
-        "-c", "bioconda",
-        "--spec", "ruff>=0.4",
-        "--with", "pytest",
-        "--refresh",
-        "ruff",
-        "check", ".",
-    ])
+    args = parser.parse_args(
+        [
+            "-c",
+            "bioconda",
+            "--spec",
+            "ruff>=0.4",
+            "--with",
+            "pytest",
+            "--refresh",
+            "ruff",
+            "check",
+            ".",
+        ]
+    )
     assert args.channels == ["bioconda"]
     assert args.spec == "ruff>=0.4"
     assert args.with_specs == ["pytest"]
