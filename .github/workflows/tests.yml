@@ -1,0 +1,54 @@
+name: Tests
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "conda_exec/**"
+      - "tests/**"
+      - "pyproject.toml"
+      - "pixi.lock"
+  pull_request:
+    branches: [main]
+    paths:
+      - "conda_exec/**"
+      - "tests/**"
+      - "pyproject.toml"
+      - "pixi.lock"
+  workflow_dispatch:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: prefix-dev/setup-pixi@v0.8.1
+        with:
+          environments: dev
+      - run: pixi run lint
+      - run: pixi run format-check
+
+  tests:
+    needs: lint
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python-version: ["3.10", "3.12", "3.13"]
+        exclude:
+          - os: macos-latest
+            python-version: "3.10"
+          - os: windows-latest
+            python-version: "3.10"
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: prefix-dev/setup-pixi@v0.8.1
+        with:
+          environments: test
+      - run: pixi run -e test test-cov
+      - uses: codecov/codecov-action@v4
+        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.13'
+        with:
+          files: coverage.xml
+          fail_ci_if_error: false
