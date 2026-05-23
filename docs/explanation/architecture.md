@@ -6,32 +6,17 @@ conda-exec is a conda plugin that enables ephemeral package execution. It create
 
 ## Flow
 
-```
-conda exec ruff check .
-    |
-    v
-plugin.py              Register "exec" and "x" subcommands
-    |
-    v
-cli/main.py            Parse args: tool name, extra args, --spec, --with, --channel
-    |
-    v
-specs.py               Normalize specs, compute cache key hash
-    |
-    v
-cache.py               Check if cached env exists (fast stat-only)
-    |
-    +--[cache hit]------> binaries.py: find binary in prefix
-    |                       touch conda-meta/history for staleness tracking
-    |
-    +--[cache miss]-----> solver + transaction (via conda APIs)
-    |                       write env to ~/.conda/exec/envs/<tool>--<hash>/
-    |
-    v
-run.py                 subprocess.run(binary_path, *extra_args)
-    |                     direct execution, no activation wrapper
-    v
-exit code              forwarded from subprocess
+```{mermaid}
+flowchart TD
+    A["conda exec ruff check ."] --> B["plugin.py\nRegister exec and x subcommands"]
+    B --> C["cli/main.py\nParse args: tool, --spec, --with, --channel"]
+    C --> D["specs.py\nNormalize specs, compute cache key hash"]
+    D --> E{"cache.py\nCached env exists?"}
+    E -- "cache hit" --> F["binaries.py\nFind binary in prefix\nTouch conda-meta/history"]
+    E -- "cache miss" --> G["Solver + transaction via conda APIs\nWrite env to ~/.conda/exec/envs/tool--hash/"]
+    G --> F
+    F --> H["run.py\nsubprocess.run with PATH prepend"]
+    H --> I["Exit code forwarded from subprocess"]
 ```
 
 ## Why not conda run?
