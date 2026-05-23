@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from conda_exec.specs import build_specs, cache_key
+from conda_exec.specs import build_specs, cache_key, validate_tool_name
 
 
 class _FakeMatchSpec:
@@ -77,3 +77,18 @@ def test_build_specs_with_extras():
 def test_build_specs_spec_plus_with():
     result = build_specs("ruff", spec="ruff>=0.4", with_specs=["pytest"])
     assert result == ["ruff>=0.4", "pytest"]
+
+
+@pytest.mark.parametrize(
+    ("name", "match"),
+    [
+        ("", "cannot be empty"),
+        ("a" * 129, "too long"),
+        ("ruff@evil", "invalid tool name"),
+        ("../escape", "invalid tool name"),
+    ],
+    ids=["empty", "too-long", "special-chars", "path-traversal"],
+)
+def test_validate_tool_name_rejects_invalid(name: str, match: str):
+    with pytest.raises(ValueError, match=match):
+        validate_tool_name(name)

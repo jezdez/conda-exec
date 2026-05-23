@@ -5,17 +5,21 @@ from __future__ import annotations
 import json
 from argparse import ArgumentParser
 from datetime import datetime, timedelta, timezone
-from pathlib import Path
+from typing import TYPE_CHECKING
 
 import pytest
 
-from conda_exec.cache import CacheEntry
 from conda_exec.cli.list import (
     configure_list_parser,
     execute_list,
     format_age,
     format_size,
 )
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
+
+    from conda_exec.cache import CacheEntry
 
 
 def test_list_parser_defaults():
@@ -94,25 +98,6 @@ def test_format_age_naive_datetime():
     assert format_age(dt) == "3 days ago"
 
 
-def _make_entry(
-    tool: str = "ruff",
-    key: str = "ruff--abcd1234",
-    size: int = 45_000_000,
-    package_count: int = 3,
-    age_days: int = 0,
-) -> CacheEntry:
-    now = datetime.now(tz=timezone.utc)
-    return CacheEntry(
-        key=key,
-        tool=tool,
-        prefix=Path(f"/fake/envs/{key}"),
-        created=now - timedelta(days=age_days + 1),
-        last_modified=now - timedelta(days=age_days),
-        size=size,
-        package_count=package_count,
-    )
-
-
 def test_execute_list_empty(
     capsys: pytest.CaptureFixture,
     monkeypatch: pytest.MonkeyPatch,
@@ -129,12 +114,11 @@ def test_execute_list_empty(
 def test_execute_list_table(
     capsys: pytest.CaptureFixture,
     monkeypatch: pytest.MonkeyPatch,
+    make_entry: Callable[..., CacheEntry],
 ):
     entries = [
-        _make_entry(
-            tool="ruff", key="ruff--abcd1234", size=45_000_000, package_count=3
-        ),
-        _make_entry(
+        make_entry(tool="ruff", key="ruff--abcd1234", size=45_000_000, package_count=3),
+        make_entry(
             tool="samtools",
             key="samtools--ef567890",
             size=120_000_000,
@@ -162,9 +146,10 @@ def test_execute_list_table(
 def test_execute_list_json(
     capsys: pytest.CaptureFixture,
     monkeypatch: pytest.MonkeyPatch,
+    make_entry: Callable[..., CacheEntry],
 ):
     entries = [
-        _make_entry(tool="ruff", key="ruff--abcd1234"),
+        make_entry(tool="ruff", key="ruff--abcd1234"),
     ]
     monkeypatch.setattr(
         "conda_exec.cache.CacheManager.list_cached", lambda self: entries

@@ -6,7 +6,7 @@ from argparse import ArgumentParser
 
 import pytest
 
-from conda_exec.cli.main import configure_parser, execute
+from conda_exec.cli.main import configure_parser, execute, execute_run
 
 
 @pytest.fixture()
@@ -184,3 +184,95 @@ def test_dispatch_clean_parses_subcommand_args(
     assert received_args[0].remove_all is True
     assert received_args[0].dry_run is True
     assert received_args[0].tool == "ruff"
+
+
+def test_execute_run_missing_tool(
+    parser: ArgumentParser,
+    capsys: pytest.CaptureFixture,
+):
+    args = parser.parse_args([])
+    rc = execute_run(args)
+    assert rc == 2
+    assert "missing TOOL argument" in capsys.readouterr().err
+
+
+def test_execute_run_strips_separator(
+    parser: ArgumentParser,
+    monkeypatch: pytest.MonkeyPatch,
+):
+    received_args: list[list[str]] = []
+    monkeypatch.setattr(
+        "conda_exec.run.run_in_prefix",
+        lambda prefix, binary, args: (received_args.append(args), 0)[1],
+    )
+    monkeypatch.setattr(
+        "conda_exec.cache.CacheManager.get_or_create",
+        lambda self, key, specs, channels: __import__("pathlib").Path("/fake"),
+    )
+    monkeypatch.setattr(
+        "conda_exec.binaries.find_binary",
+        lambda prefix, name: __import__("pathlib").Path("/fake/bin/ruff"),
+    )
+    args = parser.parse_args(["ruff", "--", "--check", "."])
+    rc = execute_run(args)
+    assert rc == 0
+    assert received_args[0] == ["--check", "."]
+
+
+def test_execute_run_refresh_removes_cache(
+    parser: ArgumentParser,
+    monkeypatch: pytest.MonkeyPatch,
+):
+    removed: list[str] = []
+    monkeypatch.setattr(
+        "conda_exec.cache.CacheManager.remove",
+        lambda self, key: removed.append(key),
+    )
+    monkeypatch.setattr(
+        "conda_exec.cache.CacheManager.get_or_create",
+        lambda self, key, specs, channels: __import__("pathlib").Path("/fake"),
+    )
+    monkeypatch.setattr(
+        "conda_exec.binaries.find_binary",
+        lambda prefix, name: __import__("pathlib").Path("/fake/bin/ruff"),
+    )
+    monkeypatch.setattr("conda_exec.run.run_in_prefix", lambda prefix, binary, args: 0)
+    args = parser.parse_args(["--refresh", "ruff"])
+    rc = execute_run(args)
+    assert rc == 0
+    assert len(removed) == 1
+
+
+def test_execute_run_binary_not_found(
+    parser: ArgumentParser,
+    capsys: pytest.CaptureFixture,
+    monkeypatch: pytest.MonkeyPatch,
+):
+    monkeypatch.setattr(
+        "conda_exec.cache.CacheManager.get_or_create",
+        lambda self, key, specs, channels: __import__("pathlib").Path("/fake"),
+    )
+    monkeypatch.setattr("conda_exec.binaries.find_binary", lambda prefix, name: None)
+    args = parser.parse_args(["ruff"])
+    rc = execute_run(args)
+    assert rc == 1
+    err = capsys.readouterr().err
+    assert "not found" in err
+    assert "hint:" in err
+
+
+def test_execute_run_conda_exec_error(
+    parser: ArgumentParser,
+    capsys: pytest.CaptureFixture,
+    monkeypatch: pytest.MonkeyPatch,
+):
+    from conda_exec.exceptions import SolveError
+
+    def fail_solve(self, key, specs, channels):
+        raise SolveError("ruff", "no candidates")
+
+    monkeypatch.setattr("conda_exec.cache.CacheManager.get_or_create", fail_solve)
+    args = parser.parse_args(["ruff"])
+    rc = execute_run(args)
+    assert rc == 1
+    assert "no candidates" in capsys.readouterr().err

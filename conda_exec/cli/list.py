@@ -71,7 +71,7 @@ def format_size(size_bytes: int) -> str:
         value /= 1024
         if value < 1024 or unit == "TB":
             return f"{value:.1f} {unit}"
-    return f"{value:.1f} TB"
+    raise AssertionError("unreachable")
 
 
 def format_age(dt: datetime | None) -> str:
