@@ -9,6 +9,8 @@ conda x ruff check .
 
 conda-exec creates a cached, isolated environment for the tool, runs it, and exits.
 The environment is cached for fast re-use but is not on PATH and is fully disposable.
+Think [npx](https://docs.npmjs.com/cli/commands/npx) or
+[uvx](https://docs.astral.sh/uv/guides/tools/) for the conda ecosystem.
 
 ## Install
 

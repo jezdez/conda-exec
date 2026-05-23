@@ -19,6 +19,60 @@ flowchart TD
     H --> I["Exit code forwarded from subprocess"]
 ```
 
+## Prior art
+
+The idea of running tools from conda packages without a persistent install
+has come up several times in the conda ecosystem:
+
+### conda-execute (2015)
+
+[conda-execute](https://github.com/conda-tools/conda-execute) by Phil Elson
+allowed running Python scripts with inline dependency declarations embedded
+in comments (similar to what [PEP 723](https://peps.python.org/pep-0723/)
+and `uv run` do today). It created temporary environments from those inline
+specs and cached them by hash. The project has been unmaintained since 2019
+and its conda-forge feedstock is archived.
+
+conda-exec solves a different problem: running packaged CLI tools (not
+scripts with inline deps) from ephemeral environments, integrated as a
+conda plugin with subcommands (`conda exec` / `conda x`).
+
+### conda issue #2379 (2016)
+
+[conda/conda#2379](https://github.com/conda/conda/issues/2379) requested a
+fast way to execute commands inside existing environments without the
+overhead of `conda activate`. The discussion led to `conda run`, which
+shipped in conda 4.6 (2018). The issue was closed in October 2025 with
+`conda run` as the official solution.
+
+conda-exec is complementary to `conda run`: while `conda run` executes
+commands in environments that already exist, conda-exec creates ephemeral
+cached environments on the fly from package specs. They address different
+use cases.
+
+### conda-exec shell script on conda-forge (2019)
+
+A [minimal shell script](https://github.com/conda-forge/conda-exec-feedstock)
+by Patrick Sodre that activates an existing conda environment and uses
+`exec` to replace the process with a given command. It was last updated
+in 2020 and has effectively zero downloads. It requires a full environment
+path as input and does not create environments.
+
+conda-exec is fundamentally different: it resolves package specs, creates
+cached environments via the solver, discovers binaries, and manages the
+cache lifecycle.
+
+### Comparable tools in other ecosystems
+
+conda-exec fills the same role as these tools in their respective ecosystems:
+
+| Tool | Ecosystem | Example |
+| ---- | --------- | ------- |
+| [npx](https://docs.npmjs.com/cli/commands/npx) | Node.js | `npx prettier --write .` |
+| [uvx](https://docs.astral.sh/uv/guides/tools/) | Python (uv) | `uvx ruff check .` |
+| [pipx run](https://pipx.pypa.io/) | Python (pip) | `pipx run black .` |
+| **conda exec** | **conda** | **`conda exec ruff check .`** |
+
 ## Why not conda run?
 
 `conda run` uses `wrap_subprocess_call()` which generates activation shell scripts, captures output by default, and adds overhead. Most CLI tools don't need full conda activation. Direct `subprocess.run` with PATH prepended is simpler, faster, and avoids output-capture pitfalls.
