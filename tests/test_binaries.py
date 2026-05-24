@@ -61,9 +61,7 @@ def test_find_binary_windows(win_prefix: Path, ext: str):
 def test_find_python_windows_prefix_root(
     win_prefix: Path, monkeypatch: pytest.MonkeyPatch
 ):
-    monkeypatch.setattr(
-        "conda.common.path.get_python_short_path", lambda: "python.exe"
-    )
+    monkeypatch.setattr("conda.common.path.get_python_short_path", lambda: "python.exe")
     (win_prefix / "python.exe").write_text("")
     result = find_python(win_prefix)
     assert result is not None
@@ -72,9 +70,7 @@ def test_find_python_windows_prefix_root(
 
 
 def test_find_python_unix(unix_prefix: Path, monkeypatch: pytest.MonkeyPatch):
-    monkeypatch.setattr(
-        "conda.common.path.get_python_short_path", lambda: "bin/python"
-    )
+    monkeypatch.setattr("conda.common.path.get_python_short_path", lambda: "bin/python")
     (unix_prefix / "bin" / "python").write_text("#!/bin/sh\n")
     result = find_python(unix_prefix)
     assert result is not None
