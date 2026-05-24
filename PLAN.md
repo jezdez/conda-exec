@@ -2,35 +2,13 @@
 
 ## Context
 
-The conda ecosystem is gaining a curated set of plugins that, together with conda-express (cx), form a modern conda distribution. cx is a single-binary Rust bootstrapper that installs conda with conda-rattler-solver as the default solver, then hands off to the installed conda binary transparently. The vision: cx eventually becomes the canonical `conda` distribution, shipping these plugins out of the box:
-
-| Plugin | Purpose | Status |
-|--------|---------|--------|
-| conda-rattler-solver | Modern solver backend (resolvo) | Shipping with cx |
-| conda-spawn | Subshell-based activation (`conda spawn`) | Shipping with cx |
-| conda-self | Self-update for conda itself | In progress |
-| conda-workspaces | Multi-environment project workspaces | Released (0.5.x) |
-| conda-global | Persistent global CLI tools (like pipx) | Released (alpha) |
-| conda-completion | Shell tab completion (Python + Rust hybrid) | Released (0.2.x) |
-| conda-pypi | PyPI interop layer | In progress |
-| **conda-exec** | **Ephemeral package execution (like npx/uvx)** | **This plan** |
-
-conda-exec fills the last major gap: running a tool from a conda package without installing it permanently. `conda exec ruff check .` creates a cached ephemeral environment, runs the command, and exits. The environment is cached for fast re-use but is not on PATH and is fully disposable.
+conda-exec lets you run any conda package without installing it permanently. `conda exec ruff check .` creates a cached ephemeral environment, runs the command, and exits. The environment is cached for fast re-use but is not on PATH and is fully disposable.
 
 This is the conda equivalent of `npx` (Node), `uvx` (Python/uv), or `pipx run`. It addresses conda/conda#13538 (`conda run -x` proposal by @jaimergp).
 
-### Why not extend conda-global?
-
-conda-global manages persistent, user-facing tool installations with PATH integration via trampolines. conda-exec manages ephemeral, cached environments for one-shot execution. They are two distinct models:
-
-- **conda-global**: persistent environments, trampoline binaries on PATH, manifest tracking, user explicitly installs/removes tools
-- **conda-exec**: ephemeral cached environments, no PATH modification, automatic cache management, user just runs a command
-
-They share some implementation patterns (solver invocation, binary discovery) but should not share state or environment prefixes.
-
 ### Why require conda-rattler-solver?
 
-Ephemeral execution must be fast. The rattler solver (via resolvo) is significantly faster than classic libmamba for cold solves. Since cx already ships conda-rattler-solver as the default, and conda-exec is designed to ship as part of the cx distribution, this is a natural requirement. conda-exec will check for the solver at startup and provide a clear error if it's missing.
+Ephemeral execution must be fast. The rattler solver (via resolvo) is significantly faster than classic libmamba for cold solves. conda-exec checks for the solver at startup and provides a clear error if it's missing.
 
 ## Path layout
 
@@ -48,8 +26,6 @@ Ephemeral execution must be fast. The rattler solver (via resolvo) is significan
 Primary path is `~/.conda/exec/`. On Windows, falls back to `platformdirs.user_data_dir("conda", "conda") / "exec"` if `~/.conda/exec/` does not exist. The `CONDA_EXEC_HOME` environment variable overrides both for testing and custom layouts.
 
 Cache keys are always `{tool}--{hash16}` where the hash is derived from sorted, normalized specs and channels. This means different specs for the same tool get separate cached environments.
-
-This is deliberately separate from conda-global's `~/.conda/global/` tree.
 
 ## Architecture
 
@@ -473,29 +449,6 @@ This is a future extension. The `[tool.conda]` approach works today and does not
 - `conda_exec/cache.py` -- `script_cache_key()` method on CacheManager
 - `tests/test_script.py` -- metadata parser tests, script execution tests (combined into single file)
 
-## cx distribution integration
-
-When cx becomes the canonical conda distribution, conda-exec ships as a built-in plugin. The user experience:
-
-```bash
-# Install cx (single binary)
-curl -fsSL https://get.conda.dev | sh
-
-# cx bootstraps conda with all plugins
-cx bootstrap
-
-# These all work out of the box:
-conda exec ruff check .          # ephemeral execution
-ce ruff check .                  # standalone alias
-conda global install gh          # persistent global tool
-conda workspace install          # multi-env workspace
-conda completion generate        # shell completions
-conda self update                # self-update
-conda spawn                      # subshell activation
-```
-
-The `cx.lock` lockfile compiled into the cx binary will include conda-exec alongside the other plugins. No separate installation step needed.
-
 ## Key files
 
 | File | Purpose |
@@ -522,13 +475,9 @@ The `cx.lock` lockfile compiled into the cx binary will include conda-exec along
 
 | Pattern | Source | How to reuse |
 |---------|--------|--------------|
-| Solver invocation | `conda_global/envs.py:37-77` | Copy pattern: MatchSpec, Channel, solver_backend(), solve_for_transaction() |
-| Binary discovery | `conda_global/binaries.py` | Copy the two functions (~55 lines) |
-| Plugin registration | `conda_global/plugin.py` | Follow same hookimpl pattern |
-| Standalone console script | `uv` / `uvx` pattern | `ce` entry point delegates to same CLI handler as `conda exec` |
+| Solver invocation | conda APIs | MatchSpec, Channel, solver_backend(), solve_for_transaction() |
+| Plugin registration | conda plugin system | hookimpl pattern for CondaSubcommand |
 | CLI with REMAINDER args | `conda/cli/main_run.py:88` | argparse REMAINDER for tool args passthrough |
-| Path layout with env override | `conda_global/paths.py` | Same pattern but with `~/.conda/exec` and CONDA_EXEC_HOME |
-| Project scaffolding | `conda_global/pyproject.toml` | Mirror structure: hatchling, pixi, ruff, pytest configs |
 | PEP 723 parsing | `uv` / `pipx` / `hatch` | All implement `# /// script` block parsing; reference for edge cases |
 | Inline metadata spec | [PEP 723](https://peps.python.org/pep-0723/) | Accepted standard for `# /// script` TOML blocks in Python scripts |
 | External deps metadata | [PEP 725](https://peps.python.org/pep-0725/) (Draft) | `[external]` table for non-PyPI deps; forward compat target |
