@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import logging
 import os
 import re
@@ -18,6 +19,7 @@ log = logging.getLogger(__name__)
 
 MAX_ENV_NAME_LEN = 200
 
+SAFE_TOOL_RE = re.compile(r"^[a-zA-Z0-9_][a-zA-Z0-9_.+-]*$")
 SAFE_KEY_RE = re.compile(r"^[a-zA-Z0-9_][a-zA-Z0-9_.+-]*--[0-9a-f]+$")
 
 
@@ -97,6 +99,7 @@ class CacheManager:
 
         try:
             transaction = solver.solve_for_transaction()
+        # SystemExit: some solver backends call sys.exit() on failure
         except (UnsatisfiableError, SystemExit) as exc:
             rm_rf(tmp_prefix)
             raise SolveError(tool, str(exc)) from exc
@@ -159,6 +162,28 @@ class CacheManager:
                 )
             )
         return entries
+
+    def cache_key(self, tool: str, specs: list[str], channels: list[str]) -> str:
+        """Compute a deterministic cache key for a set of specs and channels.
+
+        Returns ``{tool}--{hash}`` where hash is the first 16 hex characters
+        of the SHA-256 of the sorted, normalized spec list and channel list.
+        """
+        from conda.models.match_spec import MatchSpec
+
+        if not tool:
+            raise ValueError("tool name cannot be empty")
+        if len(tool) > 128:
+            raise ValueError(f"tool name too long: {len(tool)} characters")
+        if not SAFE_TOOL_RE.match(tool):
+            raise ValueError(
+                f"invalid tool name: {tool!r} "
+                "(must contain only alphanumeric, dash, dot, plus, underscore)"
+            )
+        normalized = sorted(str(MatchSpec(s)) for s in specs)
+        blob = "|".join(normalized) + "||" + "|".join(sorted(channels))
+        h = hashlib.sha256(blob.encode()).hexdigest()[:16]
+        return f"{tool}--{h}"
 
     def prefix_for(self, key: str) -> Path:
         if len(key) > MAX_ENV_NAME_LEN:

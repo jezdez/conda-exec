@@ -2,14 +2,16 @@
 
 from __future__ import annotations
 
-import sys
 from argparse import REMAINDER, ArgumentParser
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from argparse import Namespace
 
-DEFAULT_CHANNELS = ["conda-forge"]
+SUBCOMMANDS: dict[str, tuple[str, str, str]] = {
+    "list": (".list", "configure_list_parser", "execute_list"),
+    "clean": (".clean", "configure_clean_parser", "execute_clean"),
+}
 
 
 def configure_parser(parser: ArgumentParser) -> None:
@@ -22,15 +24,6 @@ def configure_parser(parser: ArgumentParser) -> None:
         dest="channels",
         metavar="CHANNEL",
         help="Additional channel to search (repeatable, default: conda-forge).",
-    )
-    parser.add_argument(
-        "--spec",
-        default=None,
-        metavar="MATCHSPEC",
-        help=(
-            "Full match spec for the tool package "
-            "(e.g. 'ruff>=0.4'). Overrides the implicit spec from TOOL."
-        ),
     )
     parser.add_argument(
         "--with",
@@ -56,7 +49,8 @@ def configure_parser(parser: ArgumentParser) -> None:
         default=None,
         metavar="TOOL",
         help=(
-            "Package name (and default binary name) to run. "
+            "Package to run, as a name or full matchspec "
+            "(e.g. 'ruff' or 'ruff>=0.4'). "
             "Use 'list' to show cached environments or 'clean' to remove them."
         ),
     )
@@ -66,12 +60,6 @@ def configure_parser(parser: ArgumentParser) -> None:
         metavar="ARGS",
         help="Arguments passed through to the tool.",
     )
-
-
-SUBCOMMANDS: dict[str, tuple[str, str, str]] = {
-    "list": (".list", "configure_list_parser", "execute_list"),
-    "clean": (".clean", "configure_clean_parser", "execute_clean"),
-}
 
 
 def execute(args: Namespace) -> int:
@@ -89,50 +77,6 @@ def execute(args: Namespace) -> int:
         sub_args = sub_parser.parse_args(tool_args)
         return getattr(mod, execute_name)(sub_args)
 
+    from .run import execute_run
+
     return execute_run(args)
-
-
-def execute_run(args: Namespace) -> int:
-    """Execute a tool from an ephemeral conda environment."""
-    from ..binaries import find_binary
-    from ..cache import CacheManager
-    from ..exceptions import BinaryNotFoundError, CondaExecError
-    from ..run import run_in_prefix
-    from ..specs import build_specs, cache_key
-
-    tool = args.tool
-    if not tool:
-        print("conda exec: missing TOOL argument", file=sys.stderr)
-        print("usage: conda exec [OPTIONS] TOOL [ARGS...]", file=sys.stderr)
-        print("       conda exec list", file=sys.stderr)
-        print("       conda exec clean", file=sys.stderr)
-        return 2
-
-    channels = args.channels or DEFAULT_CHANNELS
-    specs = build_specs(tool, spec=args.spec, with_specs=args.with_specs)
-    key = cache_key(tool, specs, channels)
-
-    tool_args = args.tool_args or []
-    if tool_args and tool_args[0] == "--":
-        tool_args = tool_args[1:]
-
-    try:
-        cache = CacheManager()
-
-        if args.refresh:
-            cache.remove(key)
-
-        prefix = cache.get_or_create(key, specs, channels)
-
-        binary = find_binary(prefix, tool)
-        if binary is None:
-            raise BinaryNotFoundError(tool, str(prefix))
-
-        return run_in_prefix(prefix, binary, tool_args)
-
-    except CondaExecError as exc:
-        print(f"conda exec: {exc.error_message}", file=sys.stderr)
-        if hasattr(exc, "hints") and exc.hints:
-            for hint in exc.hints:
-                print(f"  hint: {hint}", file=sys.stderr)
-        return 1

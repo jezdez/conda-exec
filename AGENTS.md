@@ -10,10 +10,10 @@
   parser configuration and dispatch.
 
 - Core modules at the package root handle distinct concerns:
-  `cache.py` (ephemeral environment lifecycle), `binaries.py`
-  (executable discovery), `run.py` (subprocess execution),
-  `specs.py` (spec normalization and cache key hashing),
-  `paths.py` (filesystem layout), `exceptions.py` (all exceptions).
+  `cache.py` (ephemeral environment lifecycle and cache key
+  hashing), `binaries.py` (executable discovery), `run.py`
+  (subprocess execution), `paths.py` (filesystem layout),
+  `exceptions.py` (all exceptions).
 
 - Tests mirror the source structure. Tests for
   `conda_exec/cache.py` live in `tests/test_cache.py`, tests for

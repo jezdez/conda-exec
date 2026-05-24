@@ -107,3 +107,61 @@ def test_cache_key_too_long(tmp_path: Path):
     long_key = "a" * 201
     with pytest.raises(ValueError, match="cache key too long"):
         cm.prefix_for(long_key)
+
+
+def test_cache_key_deterministic(tmp_path: Path):
+    cm = CacheManager(envs_dir=tmp_path)
+    key1 = cm.cache_key("ruff", ["ruff"], ["conda-forge"])
+    key2 = cm.cache_key("ruff", ["ruff"], ["conda-forge"])
+    assert key1 == key2
+
+
+def test_cache_key_starts_with_tool(tmp_path: Path):
+    cm = CacheManager(envs_dir=tmp_path)
+    key = cm.cache_key("ruff", ["ruff"], ["conda-forge"])
+    assert key.startswith("ruff--")
+
+
+def test_cache_key_has_hash(tmp_path: Path):
+    cm = CacheManager(envs_dir=tmp_path)
+    key = cm.cache_key("ruff", ["ruff"], ["conda-forge"])
+    _, h = key.split("--", 1)
+    assert len(h) == 16
+    assert all(c in "0123456789abcdef" for c in h)
+
+
+def test_cache_key_differs_with_different_specs(tmp_path: Path):
+    cm = CacheManager(envs_dir=tmp_path)
+    key1 = cm.cache_key("ruff", ["ruff"], ["conda-forge"])
+    key2 = cm.cache_key("ruff", ["ruff>=0.4"], ["conda-forge"])
+    assert key1 != key2
+
+
+def test_cache_key_differs_with_different_channels(tmp_path: Path):
+    cm = CacheManager(envs_dir=tmp_path)
+    key1 = cm.cache_key("ruff", ["ruff"], ["conda-forge"])
+    key2 = cm.cache_key("ruff", ["ruff"], ["defaults"])
+    assert key1 != key2
+
+
+def test_cache_key_order_independent(tmp_path: Path):
+    cm = CacheManager(envs_dir=tmp_path)
+    key1 = cm.cache_key("ruff", ["ruff", "pytest"], ["conda-forge"])
+    key2 = cm.cache_key("ruff", ["pytest", "ruff"], ["conda-forge"])
+    assert key1 == key2
+
+
+@pytest.mark.parametrize(
+    ("name", "match"),
+    [
+        ("", "cannot be empty"),
+        ("a" * 129, "too long"),
+        ("ruff@evil", "invalid tool name"),
+        ("../escape", "invalid tool name"),
+    ],
+    ids=["empty", "too-long", "special-chars", "path-traversal"],
+)
+def test_cache_key_rejects_invalid_tool_name(tmp_path: Path, name: str, match: str):
+    cm = CacheManager(envs_dir=tmp_path)
+    with pytest.raises(ValueError, match=match):
+        cm.cache_key(name, [name], ["conda-forge"])

@@ -2,18 +2,15 @@
 
 from __future__ import annotations
 
-from argparse import ArgumentParser
+from typing import TYPE_CHECKING
 
-import pytest
+from conda_exec.cli.main import execute
+from conda_exec.cli.run import execute_run
 
-from conda_exec.cli.main import configure_parser, execute, execute_run
+if TYPE_CHECKING:
+    from argparse import ArgumentParser
 
-
-@pytest.fixture()
-def parser() -> ArgumentParser:
-    p = ArgumentParser()
-    configure_parser(p)
-    return p
+    import pytest
 
 
 def test_parse_bare_tool(parser: ArgumentParser):
@@ -21,7 +18,6 @@ def test_parse_bare_tool(parser: ArgumentParser):
     assert args.tool == "ruff"
     assert args.tool_args == []
     assert args.channels is None
-    assert args.spec is None
     assert args.with_specs is None
 
 
@@ -48,10 +44,9 @@ def test_parse_multiple_channels(parser: ArgumentParser):
     assert args.channels == ["bioconda", "defaults"]
 
 
-def test_parse_spec(parser: ArgumentParser):
-    args = parser.parse_args(["--spec", "ruff>=0.4", "ruff"])
-    assert args.spec == "ruff>=0.4"
-    assert args.tool == "ruff"
+def test_parse_matchspec(parser: ArgumentParser):
+    args = parser.parse_args(["ruff>=0.4"])
+    assert args.tool == "ruff>=0.4"
 
 
 def test_parse_with_specs(parser: ArgumentParser):
@@ -75,21 +70,18 @@ def test_parse_all_options(parser: ArgumentParser):
         [
             "-c",
             "bioconda",
-            "--spec",
-            "ruff>=0.4",
             "--with",
             "pytest",
             "--refresh",
-            "ruff",
+            "ruff>=0.4",
             "check",
             ".",
         ]
     )
     assert args.channels == ["bioconda"]
-    assert args.spec == "ruff>=0.4"
     assert args.with_specs == ["pytest"]
     assert args.refresh is True
-    assert args.tool == "ruff"
+    assert args.tool == "ruff>=0.4"
     assert args.tool_args == ["check", "."]
 
 
@@ -150,7 +142,8 @@ def test_dispatch_to_clean(parser: ArgumentParser, monkeypatch: pytest.MonkeyPat
 def test_dispatch_to_run(parser: ArgumentParser, monkeypatch: pytest.MonkeyPatch):
     calls: list[str] = []
     monkeypatch.setattr(
-        "conda_exec.cli.main.execute_run", lambda args: (calls.append("run"), 0)[1]
+        "conda_exec.cli.run.execute_run",
+        lambda args: (calls.append("run"), 0)[1],
     )
     args = parser.parse_args(["ruff"])
     rc = execute(args)
@@ -203,7 +196,7 @@ def test_execute_run_strips_separator(
     received_args: list[list[str]] = []
     monkeypatch.setattr(
         "conda_exec.run.run_in_prefix",
-        lambda prefix, binary, args: (received_args.append(args), 0)[1],
+        lambda prefix, binary, args, **kw: (received_args.append(args), 0)[1],
     )
     monkeypatch.setattr(
         "conda_exec.cache.CacheManager.get_or_create",
@@ -236,7 +229,10 @@ def test_execute_run_refresh_removes_cache(
         "conda_exec.binaries.find_binary",
         lambda prefix, name: __import__("pathlib").Path("/fake/bin/ruff"),
     )
-    monkeypatch.setattr("conda_exec.run.run_in_prefix", lambda prefix, binary, args: 0)
+    monkeypatch.setattr(
+        "conda_exec.run.run_in_prefix",
+        lambda prefix, binary, args, **kw: 0,
+    )
     args = parser.parse_args(["--refresh", "ruff"])
     rc = execute_run(args)
     assert rc == 0

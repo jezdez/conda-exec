@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from argparse import ArgumentParser
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -9,9 +10,18 @@ from typing import TYPE_CHECKING
 import pytest
 
 from conda_exec.cache import CacheEntry
+from conda_exec.cli.main import configure_parser
 
 if TYPE_CHECKING:
     from collections.abc import Callable
+
+
+@pytest.fixture()
+def parser() -> ArgumentParser:
+    """Create the top-level ``conda exec`` argument parser."""
+    p = ArgumentParser()
+    configure_parser(p)
+    return p
 
 
 @pytest.fixture()

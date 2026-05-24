@@ -10,12 +10,8 @@ from typing import TYPE_CHECKING
 import pytest
 import time_machine
 
-from conda_exec.cli.list import (
-    configure_list_parser,
-    execute_list,
-    format_age,
-    format_size,
-)
+from conda_exec.cli.format import format_age, format_size
+from conda_exec.cli.list import configure_list_parser, execute_list
 
 if TYPE_CHECKING:
     from collections.abc import Callable

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from .list import format_size
+from .format import format_size
 
 if TYPE_CHECKING:
     from argparse import ArgumentParser, Namespace

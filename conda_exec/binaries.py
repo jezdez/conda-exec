@@ -8,6 +8,8 @@ from typing import TYPE_CHECKING
 from conda.common.compat import on_win
 from conda.common.path import BIN_DIRECTORY
 
+WIN_EXTENSIONS = (".exe", ".bat", ".cmd")
+
 if TYPE_CHECKING:
     from pathlib import Path
 
@@ -24,7 +26,7 @@ def find_binary(prefix: Path, name: str) -> Path | None:
         return None
 
     if on_win:
-        for ext in (".exe", ".bat", ".cmd", ""):
+        for ext in (*WIN_EXTENSIONS, ""):
             candidate = bin_dir / f"{name}{ext}"
             if candidate.is_file():
                 if is_within_prefix(candidate, prefix):
@@ -52,7 +54,7 @@ def discover_binaries(prefix: Path) -> list[str]:
         if not entry.is_file():
             continue
         if on_win:
-            if entry.suffix.lower() in (".exe", ".bat", ".cmd"):
+            if entry.suffix.lower() in WIN_EXTENSIONS:
                 binaries.append(entry.stem)
         else:
             if is_executable(entry):
@@ -61,6 +63,7 @@ def discover_binaries(prefix: Path) -> list[str]:
 
 
 def is_executable(path: Path) -> bool:
+    """Check whether a file has any executable permission bit set."""
     return bool(path.stat().st_mode & (stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH))
 
 
