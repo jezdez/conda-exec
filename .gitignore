@@ -20,3 +20,4 @@ docs/_build/
 *.dylib
 .env
 .venv
+benchmark-results.json

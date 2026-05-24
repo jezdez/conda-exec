@@ -84,8 +84,11 @@ select = [
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "-ra -v -m 'not slow'"
-markers = ["slow: integration tests that require network and a solver"]
+addopts = "-ra -v -m 'not slow and not benchmark'"
+markers = [
+  "slow: integration tests that require network and a solver",
+  "benchmark: performance benchmarks (run with pytest-benchmark)",
+]
 
 [tool.ty.environment]
 python-version = "3.10"
@@ -109,6 +112,7 @@ pre-commit = ">=4.0"
 
 [tool.pixi.feature.test.dependencies]
 pytest = ">=8.0"
+pytest-benchmark = ">=5.0"
 pytest-cov = ">=4.0"
 pytest-subprocess = ">=1.5"
 time-machine = ">=2.0"
@@ -138,6 +142,7 @@ typecheck = { cmd = "ty check conda_exec", description = "Run type checker" }
 test = { cmd = "pytest", description = "Run test suite" }
 test-cov = { cmd = "pytest --cov --cov-report=term-missing --cov-report=html --cov-report=xml", description = "Tests with coverage" }
 test-integration = { cmd = "pytest -m slow -v", description = "Run integration tests (requires network)" }
+bench = { cmd = "pytest -m benchmark --benchmark-json benchmark-results.json -v", description = "Run benchmarks" }
 
 [tool.pixi.tasks.check]
 depends-on = ["lint", "format-check", "typecheck"]

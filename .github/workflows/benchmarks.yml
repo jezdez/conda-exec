@@ -1,0 +1,73 @@
+name: Benchmarks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  benchmark:
+    name: Run benchmarks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          persist-credentials: false
+
+      - uses: prefix-dev/setup-pixi@ba3bb36eb2066252b2363392b7739741587343e0 # v0.8.1
+        with:
+          environments: test
+
+      - uses: bencherdev/bencher@main
+
+      - name: Run benchmarks
+        run: pixi run -e test bench
+
+      - name: Track benchmarks (push to main)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          BENCHER_API_TOKEN: ${{ secrets.BENCHER_API_TOKEN }}
+        run: |
+          bencher run \
+            --project conda-exec \
+            --token "$BENCHER_API_TOKEN" \
+            --branch main \
+            --testbed ubuntu-latest \
+            --adapter python_pytest \
+            --file benchmark-results.json \
+            --threshold-measure latency \
+            --threshold-test t_test \
+            --threshold-upper-boundary 0.99 \
+            --err
+
+      - name: Check benchmarks (pull request)
+        if: github.event_name == 'pull_request'
+        env:
+          BENCHER_API_TOKEN: ${{ secrets.BENCHER_API_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HEAD_REF: ${{ github.head_ref }}
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          bencher run \
+            --project conda-exec \
+            --token "$BENCHER_API_TOKEN" \
+            --branch "$HEAD_REF" \
+            --start-point "$BASE_REF" \
+            --start-point-clone-thresholds \
+            --start-point-reset \
+            --testbed ubuntu-latest \
+            --adapter python_pytest \
+            --file benchmark-results.json \
+            --threshold-measure latency \
+            --threshold-test t_test \
+            --threshold-upper-boundary 0.99 \
+            --err \
+            --github-actions "$GH_TOKEN"
