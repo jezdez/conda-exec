@@ -33,8 +33,13 @@ Use the standard PEP 723 `dependencies` field for PyPI packages:
 conda exec script.py
 ```
 
-This requires [conda-pypi](https://github.com/conda-incubator/conda-pypi)
-to be installed. conda-exec adds the `conda-pypi` channel automatically.
+```{warning}
+PyPI dependencies require [conda-pypi](https://github.com/conda/conda-pypi)
+to be installed. Without it, conda-exec cannot resolve PyPI packages and will
+exit with an error.
+```
+
+conda-exec adds the `conda-pypi` channel automatically.
 
 Install conda-pypi if you haven't already:
 
@@ -87,8 +92,12 @@ dependencies.
 
 ## Scripts without metadata
 
+```{note}
 Scripts without a `# /// script` block run directly with the current
-Python interpreter, without creating an environment:
+Python interpreter. No environment is created, and no packages are installed.
+```
+
+Scripts without metadata are passed through as-is:
 
 ```bash
 conda exec hello.py

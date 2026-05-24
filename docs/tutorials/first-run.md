@@ -10,11 +10,24 @@ This tutorial walks through running a tool with conda-exec for the first time.
 
 ## Step 1: Run a tool
 
-Let's run `ruff`, a fast Python linter:
+Run `ruff`, a fast Python linter:
+
+::::{tab-set}
+:::{tab-item} conda exec
 
 ```bash
 conda exec ruff check .
 ```
+
+:::
+:::{tab-item} ce (standalone)
+
+```bash
+ce ruff check .
+```
+
+:::
+::::
 
 On the first run, you will see a progress message while the environment is created:
 
@@ -44,6 +57,10 @@ ce ruff check .
 ```
 
 `ce` is a standalone command that works the same as `conda exec`.
+
+```{tip}
+Run `conda exec --list` to see all cached environments and their sizes.
+```
 
 ## What happened?
 

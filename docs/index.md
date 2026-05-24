@@ -133,4 +133,5 @@ Script metadata <reference/script-metadata>
 Architecture <explanation/architecture>
 Caching <explanation/caching>
 Security <explanation/security>
+Prior art <explanation/prior-art>
 ```

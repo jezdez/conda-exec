@@ -7,6 +7,9 @@ dependencies permanently.
 
 ### Synopsis
 
+::::{tab-set}
+:::{tab-item} conda exec
+
 ```text
 conda exec [OPTIONS] TOOL [TOOL_ARGS...]
 conda exec [OPTIONS] SCRIPT.py [SCRIPT_ARGS...]
@@ -14,11 +17,18 @@ conda exec --list [--json]
 conda exec --clean [OPTIONS] [TOOL]
 ```
 
-A standalone `ce` command is also available as an alias:
+:::
+:::{tab-item} ce (standalone alias)
 
 ```text
 ce [OPTIONS] TOOL [TOOL_ARGS...]
+ce [OPTIONS] SCRIPT.py [SCRIPT_ARGS...]
+ce --list [--json]
+ce --clean [OPTIONS] [TOOL]
 ```
+
+:::
+::::
 
 ### Options
 
@@ -47,6 +57,14 @@ ce [OPTIONS] TOOL [TOOL_ARGS...]
 
 `TOOL_ARGS`
 : Arguments passed through to the tool or script. Use `--` to separate conda-exec options from tool options.
+
+```{note}
+If the tool's arguments start with dashes (e.g. `--config`), conda-exec may
+try to interpret them as its own flags. Place a `--` separator between
+conda-exec options and the tool's arguments to avoid this:
+
+    conda exec ruff -- --config pyproject.toml check .
+```
 
 ### Examples
 
@@ -100,9 +118,16 @@ parses the declared dependencies and creates a cached environment for them.
 : Python version constraint (optional). Translated to a `python` spec
   in the environment solve.
 
+```{warning}
+Scripts that declare top-level `dependencies` (PyPI packages) require
+[conda-pypi](https://github.com/conda/conda-pypi) to be installed.
+If conda-pypi is missing, conda-exec raises a `PyPIDependencyError`. Scripts
+that only use `[tool.conda].dependencies` do not need conda-pypi.
+```
+
 `dependencies`
 : PyPI package dependencies (PEP 723 standard field). Requires
-  [conda-pypi](https://github.com/conda-incubator/conda-pypi)
+  [conda-pypi](https://github.com/conda/conda-pypi)
   to be installed. The `conda-pypi` channel is added automatically.
 
 `[tool.conda].dependencies`

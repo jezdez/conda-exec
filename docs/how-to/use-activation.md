@@ -32,6 +32,12 @@ conda exec --activate -c bioconda snakemake --cores 4
 
 ## When you do not need activation
 
+```{tip}
+Most CLI tools work without activation. If you are running linters,
+formatters, or similar standalone tools, skip `--activate` for faster
+execution.
+```
+
 Most standalone CLI tools only need the binary on `PATH` and work fine
 without activation. For example, linters, formatters, and build tools
 typically do not inspect `CONDA_PREFIX`:

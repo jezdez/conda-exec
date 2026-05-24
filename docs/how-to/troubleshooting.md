@@ -1,5 +1,11 @@
 # Troubleshoot common issues
 
+```{tip}
+Most cache-related problems are fixed by running `conda exec --refresh TOOL ...`,
+which discards the cached environment and creates a fresh one. Try this first
+before deeper debugging.
+```
+
 ## "command not found" after install
 
 If `conda exec` is not recognized after installing conda-exec, the plugin
@@ -108,6 +114,12 @@ conda exec --clean --all --yes
 
 ```text
 conda exec: ruff: permission denied
+```
+
+```{warning}
+Re-creating an environment with `--refresh` removes any manual
+customizations made to that cached environment. If you have added files
+or modified the environment by hand, back them up first.
 ```
 
 The binary exists but is not executable. This can happen if the cached

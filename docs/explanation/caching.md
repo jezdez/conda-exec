@@ -33,6 +33,12 @@ Scripts use a different key scheme: `script--{hash16}`. The hash is computed fro
 
 This design has a practical consequence: if you edit a script's code without changing its dependency block, conda-exec reuses the existing environment. Only changes to the `# /// script` metadata trigger a new environment solve.
 
+```{note}
+Because script cache keys are derived from metadata rather than file content,
+two different scripts with identical dependency blocks share the same cached
+environment. This is intentional and avoids redundant solves.
+```
+
 ## Cache directory layout
 
 Cached environments live under `~/.conda/exec/envs/`. Each environment is a standard conda prefix directory:
@@ -87,6 +93,13 @@ Cache existence checks deliberately avoid loading `PrefixData`. Calling `PrefixD
 conda-exec uses the `conda-meta/history` file's mtime (modification time) to track when an environment was last used. Every cache hit calls `touch()` on this file, which updates its mtime to the current time.
 
 To avoid excessive filesystem writes on tools that run frequently (linters in editor save hooks, formatters in CI loops), the touch operation includes a 1-hour debounce. If the history file was modified less than 3600 seconds ago, the touch is skipped entirely.
+
+```{tip}
+The 1-hour debounce means that running `conda exec ruff` hundreds of times
+per hour (e.g. from an editor on-save hook) produces at most one filesystem
+write for staleness tracking. This keeps the overhead of cache hits minimal
+even under heavy use.
+```
 
 The `--clean` command reads these mtimes to determine which environments are stale. An environment that has not been used in a configurable number of days can be removed to reclaim disk space. Without the touch-on-hit mechanism, the clean command would have no way to distinguish actively used environments from forgotten ones.
 

@@ -4,6 +4,14 @@ conda-exec runs arbitrary binaries from automatically created environments. This
 
 ## Trust boundaries
 
+```{warning}
+conda-exec trusts your configured channels completely. Running
+`conda exec sometool` downloads and executes binaries from those channels
+without additional verification. Only use channels you trust, and be
+careful when adding third-party channels via `--channel` or
+`[tool.conda].channels` in script metadata.
+```
+
 conda-exec trusts the conda solver and the configured package repositories. If a user runs `conda exec ruff`, they are trusting that the `ruff` package from their configured channels (typically conda-forge) contains what it claims. conda-exec does not add verification beyond what conda itself provides. Channel trust, package signatures, and repository integrity are all delegated to conda's own security model.
 
 What conda-exec *does* control is everything that happens after packages are installed into the cache: which binary gets executed, how it is invoked, and what environment it runs in.

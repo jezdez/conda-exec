@@ -14,15 +14,22 @@ it is already included.
 
 Run any conda package without installing it:
 
+::::{tab-set}
+:::{tab-item} conda exec
+
 ```bash
 conda exec ruff check .
 ```
 
-Or use the standalone `ce` command:
+:::
+:::{tab-item} ce (standalone)
 
 ```bash
 ce ruff check .
 ```
+
+:::
+::::
 
 The first invocation creates a cached environment. Subsequent runs reuse the cache and start instantly.
 
@@ -79,5 +86,9 @@ conda exec script.py
 
 conda-exec parses the inline metadata, creates a cached environment with all
 declared dependencies (both conda and PyPI), and runs the script.
+
+```{note}
+Scripts with PyPI `dependencies` require [conda-pypi](https://github.com/conda/conda-pypi) to be installed. Conda-only scripts (using only `[tool.conda]` dependencies) work without it.
+```
 
 Scripts without metadata run directly with the current Python.

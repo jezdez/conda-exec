@@ -54,7 +54,7 @@ A list of PyPI package names, following PEP 508 syntax.
 # ///
 ```
 
-Requires [conda-pypi](https://github.com/conda-incubator/conda-pypi)
+Requires [conda-pypi](https://github.com/conda/conda-pypi)
 to be installed. When PyPI dependencies are present, the `conda-pypi`
 channel is added to the channel list automatically. If conda-pypi is
 not installed, conda-exec raises a `PyPIDependencyError`.
@@ -129,6 +129,13 @@ these rules:
 conda-exec skips metadata parsing for files larger than 10 MB
 (`MAX_SCRIPT_SIZE`). Scripts exceeding this limit are treated as having
 no metadata block.
+
+```{note}
+The 10 MB limit exists to prevent memory exhaustion when conda-exec is
+pointed at large generated files or binaries that happen to have a `.py`
+extension. In practice, Python scripts with inline metadata are far smaller
+than this threshold.
+```
 
 ## Cache key computation
 
@@ -238,3 +245,11 @@ The `[tool.conda]` extension fields are ignored by uv (and other
 PEP 723 consumers), so scripts that include conda-specific
 configuration remain valid for other tools. They will simply not
 install the conda-specific dependencies.
+
+```{tip}
+You can write scripts that work with both conda-exec and uv. Put
+PyPI-only dependencies in the standard `dependencies` field and
+conda-specific packages in `[tool.conda].dependencies`. Running the
+script with `uv run` installs the PyPI packages; running with
+`conda exec` installs both.
+```

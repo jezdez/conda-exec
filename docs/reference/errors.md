@@ -3,6 +3,11 @@
 All error conditions raised by conda-exec, with their messages, hints,
 and exit codes.
 
+```{tip}
+For step-by-step solutions to common problems, see the
+[Troubleshooting guide](../how-to/troubleshooting.md).
+```
+
 ## Exit codes
 
 | Code  | Meaning |

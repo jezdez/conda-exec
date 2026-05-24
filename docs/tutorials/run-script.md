@@ -6,10 +6,23 @@ metadata.
 
 ## Prerequisites
 
+::::{tab-set}
+:::{tab-item} Conda-only scripts
+
 - conda 25.1 or later
 - conda-rattler-solver installed
 - conda-exec installed (`conda install conda-exec`)
-- conda-pypi installed (only if using PyPI dependencies)
+
+:::
+:::{tab-item} PyPI or mixed scripts
+
+- conda 25.1 or later
+- conda-rattler-solver installed
+- conda-exec installed (`conda install conda-exec`)
+- conda-pypi installed (`conda install conda-pypi`)
+
+:::
+::::
 
 ## Step 1: Write a script with conda dependencies
 
@@ -53,8 +66,12 @@ Subsequent runs reuse the cached environment and start instantly.
 
 conda-exec supports the standard PEP 723 `dependencies` field for PyPI
 packages. These are resolved through the
-[conda-pypi](https://github.com/conda-incubator/conda-pypi) channel,
+[conda-pypi](https://github.com/conda/conda-pypi) channel,
 which requires conda-pypi to be installed.
+
+```{warning}
+PyPI dependencies require [conda-pypi](https://github.com/conda/conda-pypi) to be installed. Without it, conda-exec cannot resolve packages from PyPI. Install it with `conda install conda-pypi`.
+```
 
 Create a file called `fetch.py`:
 
@@ -127,3 +144,7 @@ conda-exec created a cached environment at
 the script's dependency metadata (not the file path or contents), so
 changing only the code without changing the dependencies reuses the same
 cached environment.
+
+```{note}
+Two scripts with identical dependency metadata share the same cached environment, even if they live in different directories or have different filenames. The cache key depends only on the declared dependencies, channels, and Python version constraint.
+```

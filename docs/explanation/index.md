@@ -30,4 +30,11 @@ How the environment cache works.
 Security considerations and trust boundaries.
 :::
 
+:::{grid-item-card} {octicon}`history` Prior art
+:link: prior-art
+:link-type: doc
+
+Related projects, ecosystem comparisons, and PEP 723.
+:::
+
 ::::

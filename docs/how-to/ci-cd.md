@@ -45,10 +45,17 @@ and work in CI without extra flags.
 
 ## Cache persistence
 
+```{tip}
+Caching the conda-exec environment directory between CI runs can cut tool
+startup time from seconds to near zero. The first run pays the cost of
+solving and downloading; every run after that reuses the cached result.
+```
+
 conda-exec stores cached environments in `~/.conda/exec/envs/`. To speed
 up CI runs, cache this directory between jobs.
 
-### GitHub Actions
+::::{tab-set}
+:::{tab-item} GitHub Actions
 
 ```yaml
 - uses: actions/cache@v4
@@ -56,6 +63,27 @@ up CI runs, cache this directory between jobs.
     path: ~/.conda/exec/envs
     key: conda-exec-${{ runner.os }}
 ```
+
+:::
+
+:::{tab-item} Generic CI
+Cache the directory `~/.conda/exec/envs` using your CI provider's cache
+mechanism. The key should include the OS to avoid cross-platform conflicts.
+
+If your CI supports a `save`/`restore` cache step:
+
+```bash
+# restore
+cp -a /cache/conda-exec-envs ~/.conda/exec/envs 2>/dev/null || true
+
+# ... run your jobs ...
+
+# save
+cp -a ~/.conda/exec/envs /cache/conda-exec-envs
+```
+
+:::
+::::
 
 With caching enabled, only the first CI run resolves and downloads
 packages. Subsequent runs reuse the cached environments and start

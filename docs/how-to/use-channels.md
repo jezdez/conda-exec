@@ -19,8 +19,13 @@ Repeat `-c` to add multiple channels. They are searched in the order given:
 conda exec -c bioconda -c defaults samtools view input.bam
 ```
 
+```{important}
 When you pass `-c`, the default `conda-forge` channel is not added
-automatically. Include it explicitly if you still need it:
+automatically. If your packages depend on `conda-forge`, you must include
+it explicitly.
+```
+
+Include `conda-forge` alongside other channels when needed:
 
 ```bash
 conda exec -c conda-forge -c bioconda samtools view input.bam
@@ -56,6 +61,12 @@ conda exec script.py
 ```
 
 ## Combine script channels with CLI channels
+
+```{tip}
+Channels are searched in order. Channels declared in script metadata come
+first, followed by any CLI channels. Put your preferred channel first to
+give it higher priority.
+```
 
 CLI channels (`-c`) are appended after channels declared in script metadata.
 Given a script that declares `channels = ["conda-forge"]`, running:

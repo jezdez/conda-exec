@@ -13,6 +13,12 @@ conda exec ruff check .
 
 ## Single version constraint
 
+```{note}
+Always quote match specs that contain version operators (`>`, `<`, `=`,
+`!`). Without quotes, the shell may interpret these characters as
+redirections or other special syntax.
+```
+
 Quote the tool argument when it contains a version specifier:
 
 ```bash
