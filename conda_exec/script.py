@@ -48,10 +48,10 @@ def parse_script_metadata(path_or_text: str) -> ScriptMetadata | None:
     if toml_str is None:
         return None
 
-    try:
+    if sys.version_info >= (3, 11):
         import tomllib
-    except ModuleNotFoundError:
-        import tomli as tomllib  # type: ignore[no-redef]
+    else:
+        import tomli as tomllib
 
     try:
         data = tomllib.loads(toml_str)

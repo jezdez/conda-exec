@@ -81,7 +81,7 @@ class CacheManager:
         Uses a temporary directory and atomic rename to prevent
         partial environments from being visible on crash.
         """
-        solver_backend = context.plugin_manager.get_cached_solver_backend()
+        solver_backend = context.plugin_manager.get_cached_solver_backend(None)
         if solver_backend is None:
             raise SolverNotAvailableError
 

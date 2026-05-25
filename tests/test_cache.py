@@ -186,7 +186,7 @@ def test_cache_key_rejects_invalid_tool_name(tmp_path: Path, name: str, match: s
 def test_create_no_solver_backend(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
     monkeypatch.setattr(
         "conda.base.context.context.plugin_manager.get_cached_solver_backend",
-        lambda: None,
+        lambda name=None: None,
     )
     cm = CacheManager(envs_dir=tmp_path)
     with pytest.raises(SolverNotAvailableError):
@@ -207,7 +207,7 @@ def test_create_solve_failure_cleans_tmp(
 
     monkeypatch.setattr(
         "conda.base.context.context.plugin_manager.get_cached_solver_backend",
-        lambda: FailingSolver,
+        lambda name=None: FailingSolver,
     )
     cm = CacheManager(envs_dir=tmp_path)
     with pytest.raises(SolveError, match="ruff"):
@@ -226,7 +226,7 @@ def test_create_invalid_match_spec_cleans_tmp(
 
     monkeypatch.setattr(
         "conda.base.context.context.plugin_manager.get_cached_solver_backend",
-        lambda: FakeSolver,
+        lambda name=None: FakeSolver,
     )
     cm = CacheManager(envs_dir=tmp_path)
     with pytest.raises(SolveError, match="ruff"):
@@ -253,7 +253,7 @@ def test_create_atomic_rename(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
 
     monkeypatch.setattr(
         "conda.base.context.context.plugin_manager.get_cached_solver_backend",
-        lambda: FakeSolver,
+        lambda name=None: FakeSolver,
     )
     cm = CacheManager(envs_dir=tmp_path)
     prefix = cm.create("ruff--abcd1234", ["ruff"], ["conda-forge"])
@@ -284,7 +284,7 @@ def test_create_concurrent_race(tmp_path: Path, monkeypatch: pytest.MonkeyPatch)
 
     monkeypatch.setattr(
         "conda.base.context.context.plugin_manager.get_cached_solver_backend",
-        lambda: FakeSolver,
+        lambda name=None: FakeSolver,
     )
     cm = CacheManager(envs_dir=tmp_path)
     prefix = cm.create("ruff--abcd1234", ["ruff"], ["conda-forge"])
