@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
 from typing import TYPE_CHECKING
 
 from conda import reporters
@@ -25,19 +24,13 @@ def execute_clean(args: Namespace) -> int:
         print("No cached environments to clean.")
         return 0
 
-    to_remove = []
-    now = datetime.now(tz=timezone.utc)
     dry_run = args.dry_run or context.dry_run
-
-    for entry in entries:
-        if args.tool and entry.tool != args.tool:
-            continue
-        if args.remove_all:
-            to_remove.append(entry)
-        elif entry.last_modified:
-            age_days = (now - entry.last_modified).total_seconds() / 86400
-            if age_days > args.older_than:
-                to_remove.append(entry)
+    to_remove = cache.cleanup_candidates(
+        entries,
+        older_than_days=args.older_than,
+        remove_all=args.remove_all,
+        tool=args.tool,
+    )
 
     if not to_remove:
         print("Nothing to clean.")
@@ -65,9 +58,9 @@ def execute_clean(args: Namespace) -> int:
             print("Aborted.")
             return 1
 
-    for entry in to_remove:
-        cache.remove(entry.key)
-        print(f"Removed {entry.key}")
+    result = cache.remove_entries(to_remove)
+    for key in result.removed_keys:
+        print(f"Removed {key}")
 
-    print(f"Cleaned {len(to_remove)} environment(s) ({format_size(total_size)}).")
+    print(f"Cleaned {result.removed_count} environment(s) ({format_size(total_size)}).")
     return 0
