@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import stat
+import sys
 from types import SimpleNamespace
 from typing import TYPE_CHECKING
 
@@ -68,7 +69,8 @@ def test_write_sidecar_lock(tmp_path: Path):
     assert path.read_text() == "lock: true\n"
 
 
-def test_write_embedded_lock_inserts_after_script_metadata(tmp_path: Path):
+@pytest.mark.skipif(sys.platform == "win32", reason="chmod +x is a no-op on Windows")
+def test_write_embedded_lock_preserves_executable_bit(tmp_path: Path):
     manager = lockfile.ScriptLockManager()
     script = tmp_path / "analysis.py"
     script.write_text(
