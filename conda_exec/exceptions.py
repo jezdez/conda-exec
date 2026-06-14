@@ -48,7 +48,7 @@ class SolverNotAvailableError(CondaExecError):
     def __init__(self) -> None:
         self.error_message = "no conda solver backend is available"
         self.hints = [
-            "install a solver backend such as conda-libmamba-solver",
+            "install or repair a solver backend in the environment that provides conda",
             "or check your 'solver' setting in .condarc",
         ]
         super().__init__(self.error_message)

@@ -59,7 +59,7 @@ Raised when no solver backend is available.
 
 ```text
 conda exec: no conda solver backend is available
-  hint: install a solver backend such as conda-libmamba-solver
+  hint: install or repair a solver backend in the environment that provides conda
   hint: or check your 'solver' setting in .condarc
 ```
 

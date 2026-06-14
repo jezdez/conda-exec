@@ -29,12 +29,19 @@ conda install -n base -c conda-forge --force-reinstall conda-exec
 conda exec: no conda solver backend is available
 ```
 
-Install or repair a conda solver backend in the same environment that provides
-your `conda` command:
+Recent conda installations provide a default solver backend. If this error
+appears, the backend is missing, broken, or the configured solver name does not
+match an installed backend.
+
+Repair the environment that provides your `conda` command:
 
 ```bash
-conda install -n base -c conda-forge conda-libmamba-solver
+conda install -n base -c conda-forge conda
 ```
+
+If your installation manages solver plugins separately, install a conda solver
+plugin supported by that installation and check the configured `solver` value in
+`.condarc`.
 
 ## "invalid match spec" error
 
