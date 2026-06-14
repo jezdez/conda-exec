@@ -11,8 +11,12 @@ if TYPE_CHECKING:
     from collections.abc import Sequence
 
 SCRIPT_EXTENSIONS = {".py", ".pyw"}
+COMPLETION_ALIAS_CE = "ce"
+COMPLETION_SOURCE_CACHED_TOOL = "cached_tool"
 COMPLETION_TYPE_CHANNEL = "channel"
+COMPLETION_TYPE_FILE = "file"
 COMPLETION_TYPE_PACKAGE_SPEC = "package_spec"
+CONDA_EXEC_HOME_ENV_VAR = "CONDA_EXEC_HOME"
 
 
 def tool_looks_like_script(tool: str) -> bool:
@@ -47,6 +51,25 @@ class ToolAction(Action):
 
 def configure_parser(parser: ArgumentParser) -> None:
     """Configure the argument parser for ``conda exec``."""
+    setattr(parser, "completion_aliases", {COMPLETION_ALIAS_CE: ["exec"]})
+    setattr(
+        parser,
+        "completion_runtime_sources",
+        {
+            COMPLETION_SOURCE_CACHED_TOOL: {
+                "kind": "directory_entries",
+                "description": "cached tool",
+                "group": "tool",
+                "env_var": CONDA_EXEC_HOME_ENV_VAR,
+                "env_suffix": ["envs"],
+                "home_suffix": [".conda", "exec", "envs"],
+                "entry_type": "directory",
+                "strip_suffix": "--",
+                "max_entries": 10_000,
+            },
+        },
+    )
+
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument(
         "--list",
@@ -170,7 +193,7 @@ def configure_parser(parser: ArgumentParser) -> None:
         help="Skip confirmation prompt (only with --clean).",
     )
 
-    parser.add_argument(
+    tool_action = parser.add_argument(
         "tool",
         action=ToolAction,
         nargs="?",
@@ -179,6 +202,23 @@ def configure_parser(parser: ArgumentParser) -> None:
         help=(
             "Package to run, as a name or full matchspec (e.g. 'ruff' or 'ruff>=0.4')."
         ),
+    )
+    setattr(
+        tool_action,
+        "completion",
+        {
+            "sources": [COMPLETION_SOURCE_CACHED_TOOL, COMPLETION_TYPE_PACKAGE_SPEC],
+            "rules": [
+                {
+                    "when_options": ["--clean"],
+                    "sources": [COMPLETION_SOURCE_CACHED_TOOL],
+                },
+                {
+                    "when_options": ["--lock"],
+                    "sources": [COMPLETION_TYPE_FILE],
+                },
+            ],
+        },
     )
     parser.add_argument(
         "tool_args",

@@ -7,8 +7,12 @@ from typing import TYPE_CHECKING
 import pytest
 
 from conda_exec.cli import (
+    COMPLETION_ALIAS_CE,
+    COMPLETION_SOURCE_CACHED_TOOL,
     COMPLETION_TYPE_CHANNEL,
+    COMPLETION_TYPE_FILE,
     COMPLETION_TYPE_PACKAGE_SPEC,
+    CONDA_EXEC_HOME_ENV_VAR,
     execute,
 )
 from conda_exec.execute import execute_run
@@ -90,9 +94,39 @@ def test_parse_with_specs(parser: ArgumentParser):
 def test_parser_exposes_completion_metadata(parser: ArgumentParser):
     actions = {action.dest: action for action in parser._actions}
 
+    assert parser.completion_aliases == {COMPLETION_ALIAS_CE: ["exec"]}
     assert actions["channels"].completion_type == COMPLETION_TYPE_CHANNEL
     assert actions["with_specs"].completion_type == COMPLETION_TYPE_PACKAGE_SPEC
     assert not hasattr(actions["tool"], "completion_type")
+    assert actions["tool"].completion == {
+        "sources": [COMPLETION_SOURCE_CACHED_TOOL, COMPLETION_TYPE_PACKAGE_SPEC],
+        "rules": [
+            {
+                "when_options": ["--clean"],
+                "sources": [COMPLETION_SOURCE_CACHED_TOOL],
+            },
+            {
+                "when_options": ["--lock"],
+                "sources": [COMPLETION_TYPE_FILE],
+            },
+        ],
+    }
+
+
+def test_parser_exposes_cached_tool_runtime_source(parser: ArgumentParser):
+    assert parser.completion_runtime_sources == {
+        COMPLETION_SOURCE_CACHED_TOOL: {
+            "kind": "directory_entries",
+            "description": "cached tool",
+            "group": "tool",
+            "env_var": CONDA_EXEC_HOME_ENV_VAR,
+            "env_suffix": ["envs"],
+            "home_suffix": [".conda", "exec", "envs"],
+            "entry_type": "directory",
+            "strip_suffix": "--",
+            "max_entries": 10_000,
+        },
+    }
 
 
 def test_parse_lock_script(
