@@ -1,5 +1,78 @@
 # Changelog
 
+## 0.3.0 (2026-06-14)
+
+This release intentionally jumps to `0.3.0` so the modern conda-exec package can
+supersede the historical `conda-forge::conda-exec` `0.2.1` package line.
+
+### Highlights
+
+- Added script lockfile support for reproducible PEP 723 script execution.
+- Added automatic cache cleanup with configurable age and frequency controls.
+- Hardened cache keys, solver error handling, metadata validation, temporary
+  prefix cleanup, and Windows binary discovery.
+- Added completion metadata for conda-completion `0.3.0`, including the `ce`
+  alias, context-aware `TOOL` completion, cached tool discovery, `--with`
+  package specs, `--channel` channels, `--clean` cached tools, and `--lock`
+  script paths.
+- Expanded documentation across how-to, reference, explanation, tutorial, and
+  demo sections.
+
+### Script lockfiles
+
+- Added `--lock` to generate or reuse script lock data for metadata-backed
+  script runs.
+- Added `--embed` to write generated lock data into the script itself.
+- Added sidecar lock discovery and digest checks so out-of-date lock data is
+  ignored when script dependency metadata changes.
+- Added `--ignore-lock` and `--refresh` paths for bypassing or regenerating lock
+  data.
+- Reused conda's environment exporter/specifier plugin APIs instead of
+  hardcoding a lockfile format.
+
+### Cache management
+
+- Added automatic cleanup for old cached environments.
+- Added config support through conda plugin settings and direct
+  `CONDA_EXEC_*` environment variable aliases.
+- Moved cleanup selection and removal behavior into the cache layer.
+- Stored the cleanup invocation counter under conda-exec's data directory with
+  atomic writes.
+
+### Hardening
+
+- Included script metadata, CLI `--with`, CLI `--channel`, automatic Python
+  specs, PyPI dependencies, and lock content in cache reuse decisions.
+- Treated `requires-python`-only scripts as metadata-backed executions that
+  create and validate a Python environment.
+- Converted invalid specs, package-not-found errors, and solver failures into
+  concise `conda exec:` messages.
+- Cleaned up temporary prefixes on creation failures.
+- Validated PEP 723 metadata field types before solving.
+- Preferred Windows `.exe` launchers over `.bat` and `.cmd` shims while keeping
+  `.bat` and `.cmd` supported.
+- Added `ty` type checking to CI.
+
+### Completion integration
+
+- Exposed parser completion metadata for `--channel`, `--with`, and the
+  context-sensitive `TOOL` positional.
+- Registered `ce` as an executable alias for the `conda exec` command tree.
+- Declared the cached-tool runtime source from `CONDA_EXEC_HOME/envs`, falling
+  back to `~/.conda/exec/envs`.
+- conda-completion `>=0.3.0` is recommended for the new completion metadata.
+  conda-exec still runs without conda-completion installed.
+
+### Documentation
+
+- Added Diataxis coverage for dependency resolution, cache cleanup, script
+  locks, package specs, PyPI dependencies, CI usage, security, ecosystem fit,
+  and list JSON output.
+- Added demo recordings for quickstart, cache management, extra packages, PyPI
+  scripts, script dependencies, and script locks.
+- Corrected activation documentation and Windows launcher caveats.
+- Updated repository and documentation URLs after the conda-incubator transfer.
+
 ## 0.1.1 (2026-05-24)
 
 Initial release of conda-exec: ephemeral package execution for conda.
