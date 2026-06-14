@@ -83,6 +83,36 @@ existing named environment. Use `conda exec COMMAND ...` when you want
 conda-exec to create or reuse an ephemeral cached environment for the requested
 package.
 
+## What happened to the old conda-exec command?
+
+The historical conda-forge package installed a `conda-exec` shell command.
+That command activated an existing environment and then ran another command
+inside it. It did not install the `ce` command, register a `conda exec` plugin
+subcommand, solve package specs, create cached environments, or read script
+metadata.
+
+The modern package keeps the `conda-exec` package name but exposes a different
+interface:
+
+- `conda exec ...` for the conda plugin subcommand
+- `ce ...` for the standalone console command
+
+It deliberately does not provide a `conda-exec ENV COMMAND ...` compatibility
+entry point. That spelling would look compatible while doing something
+substantially different. For the old "run this command inside an existing
+environment" use case, use conda's native command instead:
+
+```bash
+conda run -n ENV COMMAND ...
+```
+
+For ephemeral tool execution, use:
+
+```bash
+conda exec TOOL ...
+ce TOOL ...
+```
+
 ## Clean up old assumptions
 
 - The modern cache lives under `~/.conda/exec` by default.
