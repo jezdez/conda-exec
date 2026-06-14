@@ -80,7 +80,7 @@ Run tools ephemerally in CI without permanent installation.
 :::
 
 :::{grid-item-card} {octicon}`arrow-switch` Migrate from classic conda-exec
-:link: upgrade-from-conda-forge-021
+:link: migrate-from-classic-conda-exec
 :link-type: doc
 
 Switch from the historical conda-forge package to modern conda-exec.
