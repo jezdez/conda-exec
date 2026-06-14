@@ -142,7 +142,7 @@ Use channels <how-to/use-channels>
 Use activation <how-to/use-activation>
 Pin versions <how-to/version-constraints>
 Use in CI/CD <how-to/ci-cd>
-Upgrade from conda-forge 0.2.1 <how-to/upgrade-from-conda-forge-021>
+Migrate from classic conda-exec <how-to/upgrade-from-conda-forge-021>
 Troubleshooting <how-to/troubleshooting>
 ```
 

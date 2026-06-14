@@ -79,7 +79,7 @@ Constrain tool versions using match specs.
 Run tools ephemerally in CI without permanent installation.
 :::
 
-:::{grid-item-card} {octicon}`arrow-switch` Upgrade from conda-forge 0.2.1
+:::{grid-item-card} {octicon}`arrow-switch` Migrate from classic conda-exec
 :link: upgrade-from-conda-forge-021
 :link-type: doc
 
