@@ -79,8 +79,10 @@ conda-global manages persistent, user-facing tool installations with PATH
 integration. conda-exec manages disposable cached environments for
 execution. The two models should not share state or prefixes.
 
-## Why require conda-rattler-solver?
+## Solver backend
 
 conda-exec calls conda's cached solver backend when it creates an
-environment. The project requires `conda-rattler-solver` so cold solves stay
-practical for one-off commands.
+environment. It does not select a solver itself; it uses the backend
+configured in conda, such as libmamba. If conda cannot provide a solver
+backend, conda-exec reports a setup error before attempting environment
+creation.

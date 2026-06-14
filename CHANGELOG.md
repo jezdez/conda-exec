@@ -158,8 +158,8 @@ ce ruff check .
 ### Dependencies
 
 - Requires conda >= 25.1
-- Requires conda-rattler-solver for fast environment creation
 - Optional: conda-pypi for PyPI dependency support in scripts
+- Optional: conda-lockfiles for script lock support
 - Runtime: packaging >= 22.0, tomli >= 1.0 (Python < 3.11)
 
 ### Test suite

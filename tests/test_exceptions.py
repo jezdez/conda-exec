@@ -41,7 +41,7 @@ def test_invalid_tool_match_spec_error():
 
 def test_solver_not_available_error():
     exc = SolverNotAvailableError()
-    assert "conda-rattler-solver" in exc.error_message
+    assert "solver backend" in exc.error_message
     assert len(exc.hints) == 2
     assert isinstance(exc, CondaExecError)
 

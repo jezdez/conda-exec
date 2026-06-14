@@ -10,15 +10,13 @@ metadata.
 :::{tab-item} Conda-only scripts
 
 - conda 25.1 or later
-- conda-rattler-solver installed
-- conda-exec installed (`conda install -c conda-forge conda-exec conda-rattler-solver`)
+- conda-exec installed (`conda install -c conda-forge conda-exec`)
 
 :::
 :::{tab-item} PyPI or mixed scripts
 
 - conda 25.1 or later
-- conda-rattler-solver installed
-- conda-exec installed (`conda install -c conda-forge conda-exec conda-rattler-solver`)
+- conda-exec installed (`conda install -c conda-forge conda-exec`)
 - conda-pypi installed (`conda install -c conda-forge conda-pypi`)
 
 :::

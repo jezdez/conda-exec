@@ -5,8 +5,7 @@ This tutorial walks through running a tool with conda-exec for the first time.
 ## Prerequisites
 
 - conda 25.1 or later
-- conda-rattler-solver installed
-- conda-exec installed (`conda install -c conda-forge conda-exec conda-rattler-solver`)
+- conda-exec installed (`conda install -c conda-forge conda-exec`)
 
 ## Step 1: Run a tool
 

@@ -15,13 +15,6 @@ may not be loaded. Verify the installation:
 conda list -n base conda-exec
 ```
 
-If it is installed but still not found, check that `conda-rattler-solver`
-is also installed. conda-exec requires it:
-
-```bash
-conda install -n base -c conda-forge conda-rattler-solver
-```
-
 The standalone `ce` command should work independently of the plugin system.
 If `conda exec` fails but `ce` works, the plugin entry point is not being
 discovered. Reinstalling conda-exec usually fixes this:
@@ -33,14 +26,22 @@ conda install -n base -c conda-forge --force-reinstall conda-exec
 ## "solver not available" error
 
 ```text
-conda exec: conda-rattler-solver is required but not installed
+conda exec: no conda solver backend is available
 ```
 
-Install the solver backend:
+Recent conda installations provide a default solver backend. If this error
+appears, the backend is missing, broken, or the configured solver name does not
+match an installed backend.
+
+Repair the environment that provides your `conda` command:
 
 ```bash
-conda install -n base -c conda-forge conda-rattler-solver
+conda install -n base -c conda-forge conda
 ```
+
+If your installation manages solver plugins separately, install a conda solver
+plugin supported by that installation and check the configured `solver` value in
+`.condarc`.
 
 ## "invalid match spec" error
 
