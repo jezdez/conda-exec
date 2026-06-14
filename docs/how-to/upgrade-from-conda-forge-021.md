@@ -1,4 +1,4 @@
-# Upgrade from conda-forge 0.2.1
+# Migrate from classic conda-exec
 
 The `conda-forge::conda-exec` package name existed before this project. Version
 `0.2.1` was a 2020 package for executing commands inside a conda environment.
