@@ -43,13 +43,13 @@ class BinaryNotFoundError(CondaExecError):
 
 
 class SolverNotAvailableError(CondaExecError):
-    """Raised when conda-rattler-solver is not installed."""
+    """Raised when no conda solver backend is available."""
 
     def __init__(self) -> None:
-        self.error_message = "conda-rattler-solver is required but not installed"
+        self.error_message = "no conda solver backend is available"
         self.hints = [
-            "install it with: conda install -n base conda-rattler-solver",
-            "or set 'solver: rattler' in your .condarc",
+            "install a solver backend such as conda-libmamba-solver",
+            "or check your 'solver' setting in .condarc",
         ]
         super().__init__(self.error_message)
 

@@ -149,7 +149,7 @@ Install the optional integration before running the script:
 
 ```yaml
 - name: Install conda-exec
-  run: conda install -n base -c conda-forge -y conda-exec conda-rattler-solver conda-pypi
+  run: conda install -n base -c conda-forge -y conda-exec conda-pypi
 
 - name: Run report script
   run: conda exec scripts/report.py --output report.json

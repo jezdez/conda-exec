@@ -24,7 +24,7 @@ and exits. The environment is reused on later runs but is not added to
 ## Installation
 
 ```bash
-conda install -c conda-forge conda-exec conda-rattler-solver
+conda install -c conda-forge conda-exec
 ```
 
 Install `conda-pypi` for scripts with PyPI dependencies, and
@@ -61,7 +61,7 @@ conda exec --refresh ruff check .
 
 1. Computes a cache key from the tool name, specs, and channels
 2. Checks `~/.conda/exec/envs/` for a cached environment
-3. On cache miss: solves and installs via conda-rattler-solver
+3. On cache miss: solves and installs via conda's configured solver backend
 4. Finds the binary in the environment's `bin/` directory
 5. Runs it directly via `subprocess.run` with PATH prepended
 6. Forwards the tool's exit code

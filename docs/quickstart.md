@@ -3,7 +3,7 @@
 ## Installation
 
 ```bash
-conda install -c conda-forge conda-exec conda-rattler-solver
+conda install -c conda-forge conda-exec
 ```
 
 Install `conda-pypi` as well if you want scripts with top-level PEP 723

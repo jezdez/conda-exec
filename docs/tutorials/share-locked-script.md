@@ -9,12 +9,11 @@ cache cleanup, on another machine, or in CI.
 ## Prerequisites
 
 - conda 25.1 or later
-- conda-rattler-solver installed
 - conda-exec installed
 - conda-lockfiles installed for the default `rattler-lock-v6` lock format
 
 ```bash
-conda install -n base -c conda-forge conda-exec conda-rattler-solver conda-lockfiles
+conda install -n base -c conda-forge conda-exec conda-lockfiles
 ```
 
 ## Step 1: Write a metadata-backed script

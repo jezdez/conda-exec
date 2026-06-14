@@ -5,10 +5,10 @@ tools to the project environment.
 
 ## Install conda-exec
 
-Install conda-exec and its solver dependency into the base environment:
+Install conda-exec into the base environment:
 
 ```bash
-conda install -n base -c conda-forge conda-exec conda-rattler-solver
+conda install -n base -c conda-forge conda-exec
 ```
 
 The standalone `ce` command is also available after installation:
@@ -107,7 +107,7 @@ jobs:
           auto-activate-base: true
 
       - name: Install conda-exec
-        run: conda install -n base -c conda-forge -y conda-exec conda-rattler-solver
+        run: conda install -n base -c conda-forge -y conda-exec
 
       - uses: actions/cache@v4
         with:

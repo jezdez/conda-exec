@@ -58,9 +58,9 @@ conda exec "ruff>=0.4,<0.5" check .
 Raised when no solver backend is available.
 
 ```text
-conda exec: conda-rattler-solver is required but not installed
-  hint: install it with: conda install -n base conda-rattler-solver
-  hint: or set 'solver: rattler' in your .condarc
+conda exec: no conda solver backend is available
+  hint: install a solver backend such as conda-libmamba-solver
+  hint: or check your 'solver' setting in .condarc
 ```
 
 ### BinaryNotFoundError
