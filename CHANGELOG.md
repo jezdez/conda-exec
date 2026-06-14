@@ -51,6 +51,9 @@ supersede the historical `conda-forge::conda-exec` `0.2.1` package line.
 - Validated PEP 723 metadata field types before solving.
 - Preferred Windows `.exe` launchers over `.bat` and `.cmd` shims while keeping
   `.bat` and `.cmd` supported.
+- Removed the direct `conda-rattler-solver` requirement; conda-exec now uses
+  conda's configured solver backend and reports a generic setup error when no
+  backend is available.
 - Added `ty` type checking to CI.
 
 ### Completion integration
@@ -71,6 +74,8 @@ supersede the historical `conda-forge::conda-exec` `0.2.1` package line.
 - Added demo recordings for quickstart, cache management, extra packages, PyPI
   scripts, script dependencies, and script locks.
 - Corrected activation documentation and Windows launcher caveats.
+- Added an upgrade guide for moving from the historical
+  `conda-forge::conda-exec` `0.2.1` package to modern `0.3.0`.
 - Updated repository and documentation URLs after the conda-incubator transfer.
 
 ## 0.1.1 (2026-05-24)
