@@ -37,7 +37,7 @@ service environment, or a shared research environment.
 | Run a Python script with inline dependencies | `conda exec script.py` |
 | Run a command in an existing named environment | [`conda run -n ENV COMMAND`](https://docs.conda.io/projects/conda/en/stable/commands/run.html) |
 | Work inside a long-lived project environment | `conda env create`, `pixi`, or a project lock workflow |
-| Install a tool permanently on your PATH | a named tool environment, `conda install`, or a dedicated tool manager |
+| Install a tool permanently on your PATH | [`conda-global`](https://conda-incubator.github.io/conda-global/) |
 | Depend on shell activation scripts | a named environment plus [`conda run`](https://docs.conda.io/projects/conda/en/stable/commands/run.html) or an activated shell |
 | Reproduce a script environment across machines | `conda exec --lock script.py` |
 
@@ -45,6 +45,22 @@ The important distinction is ownership. conda-exec owns disposable cached
 prefixes. Project tools own project environments.
 [conda run](https://docs.conda.io/projects/conda/en/stable/commands/run.html)
 owns the "execute inside an existing environment" path.
+
+## conda-exec and conda-global
+
+[`conda-global`](https://conda-incubator.github.io/conda-global/) is the
+right tool when a command should become part of your normal shell
+environment. It creates persistent tool environments, records them in a
+manifest, and exposes binaries on `PATH` through trampolines.
+
+conda-exec is for runs that should not become part of your shell. It creates
+or reuses cached environments from the requested specs, runs the command or
+script, and leaves `PATH` untouched. Use it for one-off commands, repeated
+temporary tooling, PEP 723 scripts, and locked script handoffs.
+
+The two tools are complementary. Promote a command to conda-global when you
+want it available every day. Keep it in conda-exec when the environment is
+an execution detail.
 
 ## Why caches are not project environments
 
