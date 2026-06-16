@@ -59,7 +59,7 @@ script, and leaves `PATH` untouched. Use it for one-off commands, repeated
 temporary tooling, PEP 723 scripts, and locked script handoffs.
 
 The two tools are complementary. Promote a command to conda-global when you
-want it available every day; keep it in conda-exec when the environment is
+want it available every day. Keep it in conda-exec when the environment is
 an execution detail.
 
 ## Why caches are not project environments
