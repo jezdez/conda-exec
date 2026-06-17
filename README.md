@@ -21,6 +21,19 @@ and exits. The environment is reused on later runs but is not added to
 
 ![conda-exec quickstart demo](demos/quickstart.gif)
 
+## conda run, conda exec, or conda global?
+
+| Tool | Use it when | Pros | Tradeoffs |
+| ---- | ----------- | ---- | --------- |
+| [`conda run`](https://docs.conda.io/projects/conda/en/stable/commands/run.html) | You already have a named or prefix environment and want to run a command inside it. | Built into conda. Works with user-managed project environments. Best fit when an environment is meant to be inspected, activated, exported, or maintained. | You must create and maintain the environment yourself. It does not install the requested command for you. One environment can still become a compatibility bottleneck. |
+| `conda exec` | You want the command or script invocation to declare the environment it needs. | Keeps `base` and project environments untouched. Caches isolated environments by spec. Supports extra packages, channels, PEP 723 script metadata, and script locks. | First run solves and installs. Cached environments are an implementation detail, not environments to edit by hand. Commands are not exposed on `PATH`. |
+| [`conda global`](https://conda-incubator.github.io/conda-global/) | You want a CLI tool permanently available from your shell. | Installs each tool into an isolated persistent environment. Exposes commands on `PATH` through trampolines. Records tools in a manifest for update and sync. | It is a tool-install lifecycle, not a per-invocation dependency declaration. Less direct for one-off commands, inline script dependencies, or locked script handoffs. |
+
+For Anaconda Project-style command catalogs, use `conda exec` when each
+command should carry its own dependency specs, use `conda global` when a
+tool should feel installed everywhere, and use `conda run` when the
+customer already owns named environments.
+
 ## Installation
 
 ```bash
