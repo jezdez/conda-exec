@@ -27,26 +27,6 @@ def test_cache_manager_custom_envs_dir(tmp_path: Path):
     assert cm.envs_dir == custom
 
 
-def test_exists_false_when_empty(tmp_path: Path):
-    cm = CacheManager(envs_dir=tmp_path)
-    assert not cm.exists("ruff--abcd1234")
-
-
-def test_exists_true_when_present(tmp_path: Path):
-    envs = tmp_path / "envs"
-    prefix = envs / "ruff--abcd1234"
-    (prefix / "conda-meta").mkdir(parents=True)
-    cm = CacheManager(envs_dir=envs)
-    assert cm.exists("ruff--abcd1234")
-
-
-def test_exists_false_without_conda_meta(tmp_path: Path):
-    envs = tmp_path / "envs"
-    (envs / "ruff--abcd1234").mkdir(parents=True)
-    cm = CacheManager(envs_dir=envs)
-    assert not cm.exists("ruff--abcd1234")
-
-
 def test_remove_nonexistent(tmp_path: Path):
     cm = CacheManager(envs_dir=tmp_path)
     cm.remove("ruff--abcd1234")

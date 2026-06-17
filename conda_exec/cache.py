@@ -148,11 +148,6 @@ class CacheManager:
 
         return final_prefix
 
-    def exists(self, key: str) -> bool:
-        """Check if a cached environment exists (fast stat-only check)."""
-        prefix = self.prefix_for(key)
-        return prefix.is_dir() and (prefix / "conda-meta").is_dir()
-
     def remove(self, key: str) -> None:
         """Remove a cached environment."""
         prefix = self.prefix_for(key)

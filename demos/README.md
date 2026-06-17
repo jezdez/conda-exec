@@ -67,7 +67,9 @@ pixi run demos
 pixi run demos quickstart
 ```
 
-Each tape writes both `demos/<name>.gif` and `demos/<name>.mp4`.
+Each tape writes both `demos/<name>.gif` and `demos/<name>.mp4`. GIFs are
+committed for docs. MP4s are ignored and can be generated for release notes or
+social previews.
 
 ## Recording notes
 
@@ -87,4 +89,4 @@ Each tape writes both `demos/<name>.gif` and `demos/<name>.mp4`.
 - `fixtures/` - small scripts copied into temporary recording directories
 - `*.tape` - individual demo scripts
 - `*.gif` - generated animated GIFs
-- `*.mp4` - generated MP4 videos
+- `*.mp4` - generated MP4 videos, ignored by git

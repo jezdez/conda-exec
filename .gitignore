@@ -21,3 +21,4 @@ docs/_build/
 .env
 .venv
 benchmark-results.json
+demos/*.mp4

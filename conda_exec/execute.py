@@ -33,11 +33,6 @@ if TYPE_CHECKING:
 DEFAULT_CHANNELS = ["conda-forge"]
 
 
-def is_script_path(tool: str) -> bool:
-    """Check if the tool argument looks like a script path."""
-    return tool_looks_like_script(tool)
-
-
 def strip_tool_separator(args: Namespace) -> list[str]:
     """Extract tool args from parsed args, stripping a leading ``--``."""
     tool_args = args.tool_args or []
@@ -74,7 +69,7 @@ def execute_run(args: Namespace) -> int:
         return 2
 
     script_path = Path(tool)
-    if is_script_path(tool) and script_path.is_file():
+    if tool_looks_like_script(tool) and script_path.is_file():
         return execute_script(args, script_path)
 
     try:

@@ -47,14 +47,6 @@ class ScriptLock:
     path: Path | None = None
 
 
-@dataclass(frozen=True)
-class ScriptLockFormat:
-    """Environment lockfile format registered with conda."""
-
-    name: str
-    default_filenames: tuple[str, ...]
-
-
 class ScriptLockManager:
     """Manage script lock discovery, writing, export, and environment creation."""
 
@@ -62,7 +54,7 @@ class ScriptLockManager:
         self.format_name = format_name
 
     @cached_property
-    def lock_format(self) -> ScriptLockFormat:
+    def lock_format(self) -> tuple[str, tuple[str, ...]]:
         """Resolve this lockfile format from conda exporter/specifier plugins."""
         plugin_manager = context.plugin_manager
         try:
@@ -98,17 +90,13 @@ class ScriptLockManager:
                 f"lock format {exporter.name!r} does not define default filenames"
             )
 
-        return ScriptLockFormat(
-            name=exporter.name,
-            default_filenames=tuple(default_filenames),
-        )
+        return exporter.name, tuple(default_filenames)
 
     @cached_property
     def exporter(self):
         """Return the conda exporter plugin for the resolved lock format."""
-        return context.plugin_manager.get_environment_exporter_by_format(
-            self.lock_format.name
-        )
+        format_name, _ = self.lock_format
+        return context.plugin_manager.get_environment_exporter_by_format(format_name)
 
     def sidecar_paths(self, script_path: Path) -> list[Path]:
         """Return supported sidecar lockfile paths for a script."""
@@ -126,7 +114,8 @@ class ScriptLockManager:
         """Return expected lockfile names without plugin lookup for the default."""
         if self.format_name == DEFAULT_LOCK_FORMAT:
             return DEFAULT_LOCK_FILENAMES
-        return self.lock_format.default_filenames
+        _, default_filenames = self.lock_format
+        return default_filenames
 
     def default_sidecar_path(self, script_path: Path) -> Path:
         """Return the default sidecar lockfile path for a script."""
@@ -319,7 +308,8 @@ class ScriptLockManager:
         """Create a cached environment from lock data via temp prefix and rename."""
         envs_dir.mkdir(parents=True, exist_ok=True)
         tmp_prefix = Path(tempfile.mkdtemp(dir=envs_dir, prefix=".tmp-"))
-        lock_path = tmp_prefix.with_suffix(f".{self.lock_format.default_filenames[0]}")
+        format_name, default_filenames = self.lock_format
+        lock_path = tmp_prefix.with_suffix(f".{default_filenames[0]}")
         try:
             self.write_text_atomic(lock_path, lock_content)
             args = [
@@ -334,7 +324,7 @@ class ScriptLockManager:
                 "--file",
                 str(lock_path),
                 "--environment-specifier",
-                self.lock_format.name,
+                format_name,
             ]
             result = subprocess.run(args, capture_output=True, text=True)  # noqa: S603
             if result.returncode:
