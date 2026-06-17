@@ -26,8 +26,6 @@ jobs:
         with:
           environments: test
 
-      - uses: bencherdev/bencher@50fb1e138651a46d2fb704fab1adab38c181552e # v0.6.6
-
       - name: Run benchmarks
         run: pixi run -e test bench
 
@@ -57,6 +55,11 @@ jobs:
         env:
           BENCHER_API_TOKEN: ${{ secrets.BENCHER_API_TOKEN }}
         run: |
+          if [ -z "$BENCHER_API_TOKEN" ]; then
+            echo "Skipping benchmark tracking because BENCHER_API_TOKEN is unavailable."
+            exit 0
+          fi
+
           bencher run \
             --project conda-exec \
             --token "$BENCHER_API_TOKEN" \

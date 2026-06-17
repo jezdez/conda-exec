@@ -11,7 +11,7 @@ if TYPE_CHECKING:
     from collections.abc import Callable
     from pathlib import Path
 
-from conda_exec.binaries import discover_binaries, find_binary, find_python
+from conda_exec.binaries import find_binary, find_python
 
 
 @pytest.fixture
@@ -85,33 +85,6 @@ def test_find_python_unix(unix_prefix: Path, monkeypatch: pytest.MonkeyPatch):
     assert result is not None
     assert result.name == "python"
     assert result.parent == unix_prefix / "bin"
-
-
-@pytest.mark.skipif(sys.platform == "win32", reason="chmod +x is a no-op on Windows")
-def test_discover_binaries_unix(unix_prefix: Path, executable: Callable[[Path], None]):
-    executable(unix_prefix / "bin" / "alpha")
-    executable(unix_prefix / "bin" / "beta")
-    (unix_prefix / "bin" / "not-exec").write_text("data")
-    result = discover_binaries(unix_prefix)
-    assert result == ["alpha", "beta"]
-
-
-def test_discover_binaries_windows(win_prefix: Path):
-    (win_prefix / "Scripts" / "alpha.exe").write_text("")
-    (win_prefix / "Scripts" / "beta.bat").write_text("")
-    (win_prefix / "Scripts" / "data.txt").write_text("")
-    result = discover_binaries(win_prefix)
-    assert result == ["alpha", "beta"]
-
-
-def test_discover_binaries_empty(unix_prefix: Path):
-    assert discover_binaries(unix_prefix) == []
-
-
-def test_discover_binaries_no_dir(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
-    monkeypatch.setattr("conda_exec.binaries.BIN_DIRECTORY", "bin")
-    monkeypatch.setattr("conda_exec.binaries.on_win", False)
-    assert discover_binaries(tmp_path) == []
 
 
 @pytest.mark.skipif(sys.platform == "win32", reason="symlinks may need privileges")

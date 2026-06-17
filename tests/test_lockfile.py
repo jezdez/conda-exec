@@ -216,7 +216,7 @@ def test_create_locked_environment_builds_conda_command(
     command = calls[0]
     assert "create" in command
     assert "--environment-specifier" in command
-    assert manager.lock_format.name in command
+    assert manager.lock_format[0] in command
 
 
 def test_create_locked_environment_failure_raises_script_lock_error(

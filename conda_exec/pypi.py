@@ -2,14 +2,11 @@
 
 from __future__ import annotations
 
+import importlib.util
+
 PYPI_CHANNEL = "conda-pypi"
 
 
 def is_available() -> bool:
     """Check whether conda-pypi is installed."""
-    try:
-        import conda_pypi  # noqa: F401
-
-        return True
-    except ImportError:
-        return False
+    return importlib.util.find_spec("conda_pypi") is not None
