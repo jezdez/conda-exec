@@ -31,36 +31,27 @@ service environment, or a shared research environment.
 
 ## Choosing the right conda workflow
 
-| Need | Better fit |
-| ---- | ---------- |
-| Run a packaged command without installing it permanently | `conda exec TOOL ...` |
-| Run a Python script with inline dependencies | `conda exec script.py` |
-| Run a command in an existing named environment | [`conda run -n ENV COMMAND`](https://docs.conda.io/projects/conda/en/stable/commands/run.html) |
-| Work inside a long-lived project environment | `conda env create`, `pixi`, or a project lock workflow |
-| Install a tool permanently on your PATH | [`conda-global`](https://conda-incubator.github.io/conda-global/) |
-| Depend on shell activation scripts | a named environment plus [`conda run`](https://docs.conda.io/projects/conda/en/stable/commands/run.html) or an activated shell |
-| Reproduce a script environment across machines | `conda exec --lock script.py` |
+| Tool | Best fit | Pros | Cons |
+| ---- | -------- | ---- | ---- |
+| [`conda run`](https://docs.conda.io/projects/conda/en/stable/commands/run.html) | Run a command inside an environment you already created with `conda create`, `conda env create`, or another project workflow. | Built into conda. Works with named and prefix environments. Good when the environment is meant to be inspected, activated, exported, updated, or shared as an environment. | The environment lifecycle is yours. `conda run` does not solve and install the requested command. Combining many unrelated commands in one environment can recreate the same compatibility pressure as a large shared environment. |
+| `conda exec` | Run a command or script whose environment should be declared at the invocation or in the script metadata. | Creates isolated cached environments without touching `base` or the current project. Keys reuse by specs, channels, or lock content. Supports `--with`, channel selection, PEP 723 script metadata, and locked script handoffs. | First run pays the solve/install cost. Cached prefixes are not intended for manual editing or activation. Commands do not become available on `PATH`. |
+| [`conda global`](https://conda-incubator.github.io/conda-global/) | Install command-line tools that should be available from any shell. | Gives each tool its own persistent environment. Exposes binaries on `PATH` through trampolines. Supports listing, updating, uninstalling, and syncing from a manifest. | It is a persistent tool manager, not a per-command dependency declaration. Less natural for one-off commands, script-local dependencies, and reproducible script locks. |
 
 The important distinction is ownership. conda-exec owns disposable cached
 prefixes. Project tools own project environments.
 [conda run](https://docs.conda.io/projects/conda/en/stable/commands/run.html)
 owns the "execute inside an existing environment" path.
 
-## conda-exec and conda-global
+If you are replacing an Anaconda Project-style catalog of commands, the
+choice depends on who owns each environment:
 
-[`conda-global`](https://conda-incubator.github.io/conda-global/) is the
-right tool when a command should become part of your normal shell
-environment. It creates persistent tool environments, records them in a
-manifest, and exposes binaries on `PATH` through trampolines.
-
-conda-exec is for runs that should not become part of your shell. It creates
-or reuses cached environments from the requested specs, runs the command or
-script, and leaves `PATH` untouched. Use it for one-off commands, repeated
-temporary tooling, PEP 723 scripts, and locked script handoffs.
-
-The two tools are complementary. Promote a command to conda-global when you
-want it available every day. Keep it in conda-exec when the environment is
-an execution detail.
+- Use `conda exec` when each command should carry its own specs, channels,
+  or script metadata. This is the closest fit for breaking one oversized
+  R-plus-Python environment into smaller command-specific environments.
+- Use `conda global` when the customer wants a stable set of everyday CLI
+  tools available on `PATH`.
+- Use `conda run` when the customer already has named environments and the
+  catalog only needs to dispatch commands into them.
 
 ## Why caches are not project environments
 
