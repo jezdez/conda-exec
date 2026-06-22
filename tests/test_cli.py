@@ -85,6 +85,15 @@ def test_parse_multiple_channels(parser: ArgumentParser):
     assert args.channels == ["bioconda", "defaults"]
 
 
+def test_parser_help_describes_configured_channels_and_clean_age(
+    parser: ArgumentParser,
+):
+    help_text = " ".join(parser.format_help().split())
+    assert "default: conda config channels" in help_text
+    assert "older than --older-than days" in help_text
+    assert "use --all to remove every cached environment" in help_text
+
+
 def test_parse_with_specs(parser: ArgumentParser):
     args = parser.parse_args(["--with", "pytest", "--with", "python=3.12", "ruff"])
     assert args.with_specs == ["pytest", "python=3.12"]
@@ -547,6 +556,10 @@ def test_execute_run_channels_reach_solver(
     monkeypatch: pytest.MonkeyPatch,
 ):
     received_channels: list[list[str]] = []
+    monkeypatch.setattr(
+        "conda_exec.execute.configured_channels",
+        lambda: pytest.fail("configured channels should not be used"),
+    )
 
     monkeypatch.setattr(
         "conda_exec.cache.CacheManager.get_or_create",
@@ -566,3 +579,31 @@ def test_execute_run_channels_reach_solver(
     rc = execute_run(args)
     assert rc == 0
     assert received_channels[0] == ["bioconda", "defaults"]
+
+
+def test_execute_run_uses_configured_channels_when_omitted(
+    parser: ArgumentParser,
+    monkeypatch: pytest.MonkeyPatch,
+):
+    received_channels: list[list[str]] = []
+    configured = ["defaults", "https://repo.anaconda.com/pkgs/main"]
+    monkeypatch.setattr("conda_exec.execute.configured_channels", lambda: configured)
+    monkeypatch.setattr(
+        "conda_exec.cache.CacheManager.get_or_create",
+        lambda self, key, specs, channels: (
+            received_channels.append(channels),
+            (__import__("pathlib").Path("/fake"), False),
+        )[1],
+    )
+    monkeypatch.setattr(
+        "conda_exec.binaries.find_binary",
+        lambda prefix, name: __import__("pathlib").Path("/fake/bin/ruff"),
+    )
+    monkeypatch.setattr(
+        "conda_exec.run.run_in_prefix", lambda prefix, binary, args, **kw: 0
+    )
+
+    rc = execute_run(parser.parse_args(["ruff"]))
+
+    assert rc == 0
+    assert received_channels == [configured]

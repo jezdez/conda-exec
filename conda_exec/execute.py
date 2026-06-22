@@ -8,6 +8,7 @@ import time
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from conda.base.context import context, reset_context
 from conda.core import prefix_data
 from conda.exceptions import InvalidMatchSpec
 from conda.models.match_spec import MatchSpec
@@ -30,7 +31,12 @@ if TYPE_CHECKING:
 
     from .lockfile import ScriptLockManager
 
-DEFAULT_CHANNELS = ["conda-forge"]
+
+def configured_channels() -> list[str]:
+    """Return conda's configured channel list."""
+    if not context.channels:
+        reset_context()
+    return list(context.channels)
 
 
 def strip_tool_separator(args: Namespace) -> list[str]:
@@ -78,7 +84,7 @@ def execute_run(args: Namespace) -> int:
         except InvalidMatchSpec as exc:
             raise InvalidToolMatchSpecError(tool, str(exc)) from exc
 
-        channels = args.channels or DEFAULT_CHANNELS
+        channels = args.channels or configured_channels()
         specs = [tool] + (args.with_specs or [])
         tool_args = strip_tool_separator(args)
 
@@ -176,7 +182,7 @@ def execute_script(args: Namespace, script_path: Path) -> int:
         if args.channels:
             channels.extend(args.channels)
         if not channels:
-            channels = list(DEFAULT_CHANNELS)
+            channels = configured_channels()
 
         if has_pypi_deps:
             from .pypi import PYPI_CHANNEL

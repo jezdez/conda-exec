@@ -490,6 +490,40 @@ def test_script_env_specs_and_channels(
     assert any(s.startswith("python") for s in script_env[0]["specs"])
 
 
+def test_script_uses_configured_channels_when_metadata_has_none(
+    parser: ArgumentParser,
+    write_script: Callable[..., Path],
+    script_env: list[dict],
+    monkeypatch: pytest.MonkeyPatch,
+):
+    configured = ["https://repo.anaconda.com/pkgs/main"]
+    monkeypatch.setattr("conda_exec.execute.configured_channels", lambda: configured)
+    script = write_script(SCRIPT_NO_METADATA)
+
+    rc = execute_run(parser.parse_args(["--with", "pytest", str(script)]))
+
+    assert rc == 0
+    assert script_env[0]["channels"] == configured
+
+
+def test_script_metadata_channels_skip_configured_channels(
+    parser: ArgumentParser,
+    write_script: Callable[..., Path],
+    script_env: list[dict],
+    monkeypatch: pytest.MonkeyPatch,
+):
+    monkeypatch.setattr(
+        "conda_exec.execute.configured_channels",
+        lambda: pytest.fail("configured channels should not be used"),
+    )
+    script = write_script(SCRIPT_CONDA_ONLY)
+
+    rc = execute_run(parser.parse_args([str(script)]))
+
+    assert rc == 0
+    assert script_env[0]["channels"] == ["conda-forge", "bioconda"]
+
+
 def test_script_pypi_deps_without_conda_pypi_fails(
     parser: ArgumentParser,
     write_script: Callable[..., Path],
