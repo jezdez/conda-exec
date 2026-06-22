@@ -75,6 +75,8 @@ social previews.
 
 - Each tape uses a temporary `CONDA_EXEC_HOME` under `/tmp` so recordings
   do not mutate the user's normal `~/.conda/exec` cache.
+- Each tape exports `CONDARC` to `demos/condarc` so recordings use the same
+  configured channels on every machine.
 - `CONDA_EXEC_AUTO_CLEAN=false` keeps automatic cleanup from changing the
   state midway through a recording.
 - `CONDA_PLUGINS_USE_SHARDED_REPODATA=1` matches the conda-workspaces demo
@@ -86,6 +88,7 @@ social previews.
 
 - `_settings.tape` - shared VHS theme, font, dimensions, and environment
   defaults
+- `condarc` - demo-specific conda configuration
 - `fixtures/` - small scripts copied into temporary recording directories
 - `*.tape` - individual demo scripts
 - `*.gif` - generated animated GIFs
