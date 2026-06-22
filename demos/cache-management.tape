@@ -7,7 +7,7 @@ Hide
 Type `eval "$(pixi shell-hook -s bash -e dev)"`
 Enter
 Wait /\)/
-Type `export PS1="$DEMO_PS1" && export SHELL=/bin/bash && export CONDA_EXEC_HOME=/tmp/conda-exec-demo-cache-management && rm -rf "$CONDA_EXEC_HOME" /tmp/conda-exec-demo-cache-management-work && mkdir -p /tmp/conda-exec-demo-cache-management-work && cd /tmp/conda-exec-demo-cache-management-work`
+Type `export CONDARC="$(pwd)/demos/condarc" && export PS1="$DEMO_PS1" && export SHELL=/bin/bash && export CONDA_EXEC_HOME=/tmp/conda-exec-demo-cache-management && rm -rf "$CONDA_EXEC_HOME" /tmp/conda-exec-demo-cache-management-work && mkdir -p /tmp/conda-exec-demo-cache-management-work && cd /tmp/conda-exec-demo-cache-management-work`
 Enter
 Wait /\$/
 Type "conda exec ruff -- --version > /dev/null 2>&1"

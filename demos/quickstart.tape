@@ -7,7 +7,7 @@ Hide
 Type `eval "$(pixi shell-hook -s bash -e dev)"`
 Enter
 Wait /\)/
-Type `export PS1="$DEMO_PS1" && export SHELL=/bin/bash && export FIXTURES="$(pwd)/demos/fixtures" && export CONDA_EXEC_HOME=/tmp/conda-exec-demo-quickstart && rm -rf "$CONDA_EXEC_HOME" /tmp/conda-exec-demo-quickstart-work && mkdir -p /tmp/conda-exec-demo-quickstart-work && cd /tmp/conda-exec-demo-quickstart-work`
+Type `export CONDARC="$(pwd)/demos/condarc" && export PS1="$DEMO_PS1" && export SHELL=/bin/bash && export FIXTURES="$(pwd)/demos/fixtures" && export CONDA_EXEC_HOME=/tmp/conda-exec-demo-quickstart && rm -rf "$CONDA_EXEC_HOME" /tmp/conda-exec-demo-quickstart-work && mkdir -p /tmp/conda-exec-demo-quickstart-work && cd /tmp/conda-exec-demo-quickstart-work`
 Enter
 Wait /\$/
 Type `cp "$FIXTURES/lint_target.py" .`
