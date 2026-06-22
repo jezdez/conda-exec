@@ -7,7 +7,7 @@ Hide
 Type `eval "$(pixi shell-hook -s bash -e dev)"`
 Enter
 Wait /\)/
-Type `export PS1="$DEMO_PS1" && export SHELL=/bin/bash && export CONDA_EXEC_HOME=/tmp/conda-exec-demo-extra-packages && rm -rf "$CONDA_EXEC_HOME" /tmp/conda-exec-demo-extra-packages-work && mkdir -p /tmp/conda-exec-demo-extra-packages-work && cd /tmp/conda-exec-demo-extra-packages-work`
+Type `export PS1="$DEMO_PS1" && export SHELL=/bin/bash && export CONDARC="$(pwd)/demos/condarc" && export CONDA_EXEC_HOME=/tmp/conda-exec-demo-extra-packages && rm -rf "$CONDA_EXEC_HOME" /tmp/conda-exec-demo-extra-packages-work && mkdir -p /tmp/conda-exec-demo-extra-packages-work && cd /tmp/conda-exec-demo-extra-packages-work`
 Enter
 Wait /\$/
 Type "clear"

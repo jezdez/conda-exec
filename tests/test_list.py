@@ -127,6 +127,8 @@ def test_execute_list_table(
 
     output = capsys.readouterr().out
     assert "Tool" in output
+    assert "Last used" in output
+    assert "Packages" in output
     assert "ruff" in output
     assert "samtools" in output
     assert "42.9 MB" in output

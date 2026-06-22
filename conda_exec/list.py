@@ -5,20 +5,23 @@ from __future__ import annotations
 import json
 from typing import TYPE_CHECKING
 
+from rich.console import Console
+
 from .cache import CacheManager
-from .format import format_age, format_size
+from .format import cache_entries_table
 
 if TYPE_CHECKING:
     from argparse import Namespace
 
 
-def execute_list(args: Namespace) -> int:
+def execute_list(args: Namespace, *, console: Console | None = None) -> int:
     """List cached tool environments."""
+    console = console or Console(highlight=False)
     cache = CacheManager()
     entries = cache.list_cached()
 
     if not entries:
-        print("No cached environments.")
+        console.print("No cached environments.")
         return 0
 
     if args.json_output:
@@ -39,14 +42,5 @@ def execute_list(args: Namespace) -> int:
         print(json.dumps(data, indent=2))
         return 0
 
-    name_width = max(len(entry.tool) for entry in entries)
-    header_width = max(name_width, 4)
-    print(f"{'Tool':<{header_width}}  {'Size':>8}  {'Last used':<16}  Packages")
-    for entry in entries:
-        size = format_size(entry.size)
-        last_used = format_age(entry.last_modified)
-        print(
-            f"{entry.tool:<{header_width}}  {size:>8}  {last_used:<16}  "
-            f"{entry.package_count}"
-        )
+    console.print(cache_entries_table(entries))
     return 0

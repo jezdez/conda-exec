@@ -7,7 +7,7 @@ Hide
 Type `eval "$(pixi shell-hook -s bash -e dev)"`
 Enter
 Wait /\)/
-Type `export PS1="$DEMO_PS1" && export SHELL=/bin/bash && export FIXTURES="$(pwd)/demos/fixtures" && export CONDA_EXEC_HOME=/tmp/conda-exec-demo-script-lock && rm -rf "$CONDA_EXEC_HOME" /tmp/conda-exec-demo-script-lock-work && mkdir -p /tmp/conda-exec-demo-script-lock-work && cd /tmp/conda-exec-demo-script-lock-work`
+Type `export PS1="$DEMO_PS1" && export SHELL=/bin/bash && export CONDARC="$(pwd)/demos/condarc" && export FIXTURES="$(pwd)/demos/fixtures" && export CONDA_EXEC_HOME=/tmp/conda-exec-demo-script-lock && rm -rf "$CONDA_EXEC_HOME" /tmp/conda-exec-demo-script-lock-work && mkdir -p /tmp/conda-exec-demo-script-lock-work && cd /tmp/conda-exec-demo-script-lock-work`
 Enter
 Wait /\$/
 Type `cp "$FIXTURES/date_report.py" .`

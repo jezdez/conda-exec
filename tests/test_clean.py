@@ -127,6 +127,8 @@ def test_execute_clean_dry_run(
 
     output = capsys.readouterr().out
     assert "Would remove 1 environment(s)" in output
+    assert "Environment" in output
+    assert "Last used" in output
     assert "ruff--abcd1234" in output
 
 
@@ -223,6 +225,7 @@ def test_execute_clean_prompts_without_yes(
 
     output = capsys.readouterr().out
     assert "Will remove 1 environment(s)" in output
+    assert "Environment" in output
 
 
 def test_execute_clean_prompt_declined(
