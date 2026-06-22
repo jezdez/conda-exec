@@ -118,7 +118,8 @@ The metadata fields combine with command-line options according to
 these rules:
 
 - Channels from the metadata and `--channel` flags are merged.
-  If the combined list is empty, `conda-forge` is used as the default.
+  If the combined list is empty, conda-exec uses the channels from your
+  conda configuration.
 - Conda dependencies from the metadata and `--with` specs are
   merged into a single spec list for the solver.
 - PyPI dependencies from `dependencies` are added to the spec list.

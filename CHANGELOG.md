@@ -1,5 +1,32 @@
 # Changelog
 
+## 0.4.0 (2026-06-22)
+
+### Changed
+
+- `conda exec` now uses the channels from conda configuration when neither
+  the command line nor script metadata supplies channels. Explicit
+  `-c/--channel` values are searched before configured channels, and
+  `--override-channels` keeps solves limited to explicitly supplied channels.
+  (#30)
+- `conda exec --clean` help and output now state that default cleanup is
+  age-based, while `--all` removes every cached environment. (#31)
+
+### Documentation
+
+- Documented how conda-exec fits alongside conda-global, conda workspaces,
+  named environments, project environments, and other conda workflows. (#24,
+  #26)
+
+### Packaging and CI
+
+- Test every supported Python version, 3.10 through 3.14, across Ubuntu,
+  macOS, and Windows. (#32)
+- Made the release workflow compatible with immutable GitHub Releases by
+  creating the draft release before publishing assets. (#22)
+- Pruned stale benchmark and generated files from the repository. (#25)
+- Updated GitHub Actions dependencies. (#23)
+
 ## 0.3.0 (2026-06-14)
 
 This release intentionally jumps to `0.3.0` so the modern conda-exec package can
