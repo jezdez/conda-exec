@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from conda.base.context import context, reset_context
+
 from conda_exec.main import main
 
 if TYPE_CHECKING:
@@ -21,6 +23,37 @@ def test_main_no_args(capsys):
 def test_main_list_mode(exec_home, capsys):
     result = main(["--list"])
     assert result == 0
+
+
+def test_main_initializes_conda_context_for_channel_flags(
+    exec_home,
+    monkeypatch,
+    tmp_path,
+):
+    recorded_channels: tuple[str, ...] | None = None
+    condarc = tmp_path / "condarc"
+    condarc.write_text("channels:\n  - https://repo.anaconda.com/pkgs/main\n")
+    search_path = context._search_path
+    argparse_args = context._argparse_args
+
+    def fake_execute(args):
+        nonlocal recorded_channels
+        recorded_channels = context.channels
+        return 0
+
+    monkeypatch.setenv("CONDARC", str(condarc))
+    monkeypatch.setattr("conda_exec.main.execute", fake_execute)
+
+    try:
+        result = main(["-c", "conda-forge", "ruff"])
+    finally:
+        reset_context(search_path, argparse_args)
+
+    assert result == 0
+    assert recorded_channels == (
+        "conda-forge",
+        "https://repo.anaconda.com/pkgs/main",
+    )
 
 
 def test_main_dispatches_to_execute(exec_home, solver_calls, monkeypatch):

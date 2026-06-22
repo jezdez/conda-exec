@@ -1,13 +1,13 @@
 # Use custom channels
 
-By default, conda-exec searches `conda-forge` for packages. You can specify
-alternative or additional
+By default, conda-exec searches the channels from your conda configuration.
+You can specify alternative or additional
 [conda channels](https://docs.conda.io/projects/conda/en/stable/user-guide/concepts/channels.html)
 from the CLI or inside script metadata.
 
 ## Specify a channel from the CLI
 
-Use `-c` or `--channel` to search a different channel:
+Use `-c` or `--channel` to add a channel before the configured channels:
 
 ```bash
 conda exec -c bioconda samtools view input.bam
@@ -15,21 +15,19 @@ conda exec -c bioconda samtools view input.bam
 
 ## Use multiple channels
 
-Repeat `-c` to add multiple channels. They are searched in the order given,
-subject to conda's configured
+Repeat `-c` to add multiple channels. CLI channels are searched in the
+order given, followed by the configured channels, subject to conda's configured
 [channel priority](https://docs.conda.io/projects/conda/en/stable/user-guide/tasks/manage-channels.html#strict-channel-priority):
 
 ```bash
 conda exec -c bioconda -c defaults samtools view input.bam
 ```
 
-```{important}
-When you pass `-c`, the default `conda-forge` channel is not added
-automatically. If your packages depend on `conda-forge`, you must include
-it explicitly.
-```
+To search only the channels you pass on the command line, add
+`--override-channels`.
 
-Include `conda-forge` alongside other channels when needed:
+Include support channels explicitly when they are not already in your conda
+configuration:
 
 ```bash
 conda exec -c conda-forge -c bioconda samtools view input.bam
@@ -81,8 +79,8 @@ conda exec -c bioconda script.py
 
 resolves packages using `["conda-forge", "bioconda"]` in that order.
 
-If neither the script metadata nor the CLI provides channels, `conda-forge`
-is used as the default.
+If neither the script metadata nor the CLI provides channels, conda-exec uses
+the channels from your conda configuration.
 
 ## How channels affect caching
 

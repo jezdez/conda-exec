@@ -8,6 +8,7 @@ import time
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from conda.base.context import context
 from conda.core import prefix_data
 from conda.exceptions import InvalidMatchSpec
 from conda.models.match_spec import MatchSpec
@@ -29,8 +30,6 @@ if TYPE_CHECKING:
     from argparse import Namespace
 
     from .lockfile import ScriptLockManager
-
-DEFAULT_CHANNELS = ["conda-forge"]
 
 
 def strip_tool_separator(args: Namespace) -> list[str]:
@@ -78,7 +77,7 @@ def execute_run(args: Namespace) -> int:
         except InvalidMatchSpec as exc:
             raise InvalidToolMatchSpecError(tool, str(exc)) from exc
 
-        channels = args.channels or DEFAULT_CHANNELS
+        channels = list(context.channels)
         specs = [tool] + (args.with_specs or [])
         tool_args = strip_tool_separator(args)
 
@@ -140,11 +139,12 @@ def execute_script(args: Namespace, script_path: Path) -> int:
 
         has_metadata = metadata is not None
         has_pypi_deps = bool(metadata and metadata.pypi_dependencies)
-        has_cli_extras = args.with_specs or args.channels
+        cli_channels = list(args.channel or [])
+        has_cli_extras = args.with_specs or cli_channels
 
         cache = CacheManager()
         locks = ScriptLockManager()
-        input_digest = locks.input_digest(metadata, args.with_specs, args.channels)
+        input_digest = locks.input_digest(metadata, args.with_specs, cli_channels)
 
         locked_rc = run_existing_lock(
             args,
@@ -154,6 +154,7 @@ def execute_script(args: Namespace, script_path: Path) -> int:
             locks,
             embedded_lock_content=blocks.lock,
             input_digest=input_digest,
+            cli_channels=cli_channels,
         )
         if locked_rc is not None:
             return locked_rc
@@ -172,11 +173,17 @@ def execute_script(args: Namespace, script_path: Path) -> int:
             if not is_available():
                 raise PyPIDependencyError
 
-        channels = list(metadata.conda_channels) if metadata else []
-        if args.channels:
-            channels.extend(args.channels)
+        metadata_channels = list(metadata.conda_channels) if metadata else []
+        channels = list(metadata_channels)
+        if context.use_local and "local" not in channels:
+            channels.insert(0, "local")
+        if cli_channels:
+            if metadata_channels:
+                channels.extend(cli_channels)
+            else:
+                channels = list(context.channels)
         if not channels:
-            channels = list(DEFAULT_CHANNELS)
+            channels = list(context.channels)
 
         if has_pypi_deps:
             from .pypi import PYPI_CHANNEL
@@ -251,15 +258,10 @@ def run_existing_lock(
     locks: ScriptLockManager,
     embedded_lock_content: str | None,
     input_digest: str,
+    cli_channels: list[str],
 ) -> int | None:
     """Run a script from existing lock data when that is the active fast path."""
-    if (
-        args.ignore_lock
-        or args.lock
-        or args.refresh
-        or args.with_specs
-        or args.channels
-    ):
+    if args.ignore_lock or args.lock or args.refresh or args.with_specs or cli_channels:
         return None
 
     script_lock = locks.discover(

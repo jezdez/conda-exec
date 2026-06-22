@@ -79,17 +79,16 @@ are cached separately.
 
 ## Use another channel
 
-By default, conda-exec searches `conda-forge`.
+By default, conda-exec searches the channels from your conda configuration.
 
-Use `-c` or `--channel` to provide channels explicitly:
+Use `-c` or `--channel` to add channels before the configured channels:
 
 ```bash
 conda exec -c conda-forge -c bioconda samtools view input.bam
 ```
 
-When you pass any `-c` flag, conda-exec uses the channels you gave. Include
-`conda-forge` yourself when a domain channel such as `bioconda` depends on
-it.
+Add `--override-channels` when you want conda to ignore configured channels
+and search only the channels from the command line.
 
 ## Handle package names and executable names
 
