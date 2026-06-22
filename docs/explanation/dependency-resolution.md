@@ -80,13 +80,14 @@ a clear setup error instead of a solver error.
 
 ## Channel defaults
 
-Tool mode uses `conda-forge` when no `-c/--channel` flags are provided.
+Tool mode uses configured conda channels when no `-c/--channel` flags are
+provided.
 
 Script mode combines channels from metadata and the CLI:
 
 1. channels declared in `[tool.conda].channels`
 2. channels passed with `-c/--channel`
-3. `conda-forge` if the combined list is empty
+3. configured conda channels if the combined list is empty
 
 When PyPI dependencies are present, `conda-pypi` is appended after those
 channels.

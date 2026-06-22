@@ -51,6 +51,8 @@ class ToolAction(Action):
 
 def configure_parser(parser: ArgumentParser) -> None:
     """Configure the argument parser for ``conda exec``."""
+    from conda.cli.helpers import add_parser_channels
+
     setattr(parser, "completion_aliases", {COMPLETION_ALIAS_CE: ["exec"]})
     setattr(
         parser,
@@ -89,14 +91,9 @@ def configure_parser(parser: ArgumentParser) -> None:
         ),
     )
 
-    channel_action = parser.add_argument(
-        "-c",
-        "--channel",
-        action="append",
-        default=None,
-        dest="channels",
-        metavar="CHANNEL",
-        help="Additional channel to search (repeatable, default: conda-forge).",
+    add_parser_channels(parser)
+    channel_action = next(
+        action for action in parser._actions if action.dest == "channel"
     )
     setattr(channel_action, "completion_type", COMPLETION_TYPE_CHANNEL)
 

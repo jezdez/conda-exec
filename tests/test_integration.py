@@ -22,14 +22,14 @@ pytestmark = pytest.mark.slow
 
 @pytest.mark.usefixtures("exec_home")
 def test_exec_end_to_end_binary_not_found(conda_cli: CondaCLIFixture):
-    out, err, code = conda_cli("exec", "zlib")
+    out, err, code = conda_cli("exec", "-c", "conda-forge", "zlib")
     assert code == 1
     assert "not found" in err
 
 
 @pytest.mark.usefixtures("exec_home")
 def test_exec_end_to_end_with_binary(conda_cli: CondaCLIFixture):
-    out, err, code = conda_cli("exec", "ruff", "--", "--help")
+    out, err, code = conda_cli("exec", "-c", "conda-forge", "ruff", "--", "--help")
     assert code == 0
 
 
@@ -90,7 +90,7 @@ def test_script_pypi_only_deps(
             print(f"six={six.__version__}")
         """)
     )
-    _, _, code = conda_cli("exec", str(script))
+    _, _, code = conda_cli("exec", "-c", "conda-forge", str(script))
     assert code == 0
 
 

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from types import SimpleNamespace
 from typing import TYPE_CHECKING
 
 import pytest
@@ -25,7 +26,7 @@ def test_parse_bare_tool(parser: ArgumentParser):
     args = parser.parse_args(["ruff"])
     assert args.tool == "ruff"
     assert args.tool_args == []
-    assert args.channels is None
+    assert args.channel is None
     assert args.with_specs is None
 
 
@@ -34,7 +35,7 @@ def test_parse_bare_tool(parser: ArgumentParser):
     [
         (["ruff", "check", "."], "tool_args", ["check", "."]),
         (["ruff", "--", "--check", "."], "tool_args", ["--check", "."]),
-        (["-c", "bioconda", "samtools"], "channels", ["bioconda"]),
+        (["-c", "bioconda", "samtools"], "channel", ["bioconda"]),
         (["ruff>=0.4"], "tool", "ruff>=0.4"),
         (["--activate", "ruff"], "activate", True),
         (["ruff"], "activate", False),
@@ -82,7 +83,13 @@ def test_parse_flag(
 
 def test_parse_multiple_channels(parser: ArgumentParser):
     args = parser.parse_args(["-c", "bioconda", "-c", "defaults", "samtools"])
-    assert args.channels == ["bioconda", "defaults"]
+    assert args.channel == ["bioconda", "defaults"]
+
+
+def test_parser_help_describes_configured_channels(parser: ArgumentParser):
+    help_text = " ".join(parser.format_help().split())
+    assert "defaults or channels from .condarc are searched" in help_text
+    assert "--override-channels" in help_text
 
 
 def test_parser_help_describes_clean_age_and_all(parser: ArgumentParser):
@@ -102,7 +109,7 @@ def test_parser_exposes_completion_metadata(parser: ArgumentParser):
     actions = {action.dest: action for action in parser._actions}
 
     assert parser.completion_aliases == {COMPLETION_ALIAS_CE: ["exec"]}
-    assert actions["channels"].completion_type == COMPLETION_TYPE_CHANNEL
+    assert actions["channel"].completion_type == COMPLETION_TYPE_CHANNEL
     assert actions["with_specs"].completion_type == COMPLETION_TYPE_PACKAGE_SPEC
     assert not hasattr(actions["tool"], "completion_type")
     assert actions["tool"].completion == {
@@ -188,7 +195,7 @@ def test_parse_all_options(parser: ArgumentParser):
             ".",
         ]
     )
-    assert args.channels == ["bioconda"]
+    assert args.channel == ["bioconda"]
     assert args.with_specs == ["pytest"]
     assert args.activate is True
     assert args.refresh is True
@@ -554,6 +561,10 @@ def test_execute_run_channels_reach_solver(
     monkeypatch: pytest.MonkeyPatch,
 ):
     received_channels: list[list[str]] = []
+    monkeypatch.setattr(
+        "conda_exec.execute.context",
+        SimpleNamespace(channels=["bioconda", "defaults"]),
+    )
 
     monkeypatch.setattr(
         "conda_exec.cache.CacheManager.get_or_create",
@@ -573,3 +584,34 @@ def test_execute_run_channels_reach_solver(
     rc = execute_run(args)
     assert rc == 0
     assert received_channels[0] == ["bioconda", "defaults"]
+
+
+def test_execute_run_uses_configured_channels_when_omitted(
+    parser: ArgumentParser,
+    monkeypatch: pytest.MonkeyPatch,
+):
+    received_channels: list[list[str]] = []
+    configured = ["defaults", "https://repo.anaconda.com/pkgs/main"]
+    monkeypatch.setattr(
+        "conda_exec.execute.context",
+        SimpleNamespace(channels=configured),
+    )
+    monkeypatch.setattr(
+        "conda_exec.cache.CacheManager.get_or_create",
+        lambda self, key, specs, channels: (
+            received_channels.append(channels),
+            (__import__("pathlib").Path("/fake"), False),
+        )[1],
+    )
+    monkeypatch.setattr(
+        "conda_exec.binaries.find_binary",
+        lambda prefix, name: __import__("pathlib").Path("/fake/bin/ruff"),
+    )
+    monkeypatch.setattr(
+        "conda_exec.run.run_in_prefix", lambda prefix, binary, args, **kw: 0
+    )
+
+    rc = execute_run(parser.parse_args(["ruff"]))
+
+    assert rc == 0
+    assert received_channels == [configured]

@@ -85,22 +85,22 @@ and require `conda-pypi`.
 
 ## Channel behavior
 
-Tool mode defaults to `conda-forge` when no channel is provided:
+Tool mode uses your configured conda channels when no channel is provided:
 
 ```bash
 conda exec ruff check .
 ```
 
-As soon as you pass one or more `-c/--channel` flags, conda-exec uses the
-provided channel list:
+When you pass one or more `-c/--channel` flags, conda-exec adds them before
+the configured channel list:
 
 ```bash
 conda exec -c conda-forge -c bioconda samtools view input.bam
 ```
 
 Script mode uses channels from `[tool.conda].channels`, then appends any
-CLI `--channel` values. If the combined list is empty, it defaults to
-`conda-forge`.
+CLI `--channel` values. If the combined list is empty, conda-exec uses
+your configured conda channels.
 
 Channel order is passed to conda's solver. Conda's configured
 [channel priority](https://docs.conda.io/projects/conda/en/stable/user-guide/tasks/manage-channels.html#strict-channel-priority)

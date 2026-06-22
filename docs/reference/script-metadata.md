@@ -95,7 +95,8 @@ A list of conda channels to search for packages.
 ```
 
 If no channels are specified (neither in the metadata nor via
-`--channel` on the command line), conda-exec defaults to `conda-forge`.
+`--channel` on the command line), conda-exec uses your configured conda
+channels.
 
 ## Automatic Python spec
 

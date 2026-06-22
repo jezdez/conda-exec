@@ -33,7 +33,7 @@ ce --clean [OPTIONS] [TOOL]
 ### Options
 
 `-c, --channel CHANNEL`
-: Additional channel to search (repeatable). Default: `conda-forge`.
+: Additional channel to search before configured conda channels (repeatable). Use `--override-channels` to ignore configured channels.
 
 `--with MATCHSPEC`
 : Additional package to install in the ephemeral environment (repeatable). Values are full match specs. Example: `--with pytest --with "python=3.12"`.
@@ -151,7 +151,7 @@ that only use `[tool.conda].dependencies` do not need conda-pypi.
 : Conda package dependencies as match specs.
 
 `[tool.conda].channels`
-: Conda channels to search. Defaults to `conda-forge` if not specified.
+: Conda channels to search. Defaults to configured conda channels if neither metadata nor CLI channels are specified.
 
 ### Script examples
 

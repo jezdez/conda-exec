@@ -96,7 +96,7 @@ and provide a short executable for frequent use.
 conda users expect channels to be explicit and meaningful. conda-exec keeps
 that model:
 
-- default channel: `conda-forge`
+- default channels from conda configuration
 - explicit channels via repeated `-c/--channel`
 - script channels in `[tool.conda].channels`
 - solver behavior delegated to conda's
