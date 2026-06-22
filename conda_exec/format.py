@@ -4,8 +4,14 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from rich.markup import escape
+from rich.table import Table
+
 if TYPE_CHECKING:
+    from collections.abc import Iterable
     from datetime import datetime
+
+    from .cache import CacheEntry
 
 
 def format_size(size_bytes: int) -> str:
@@ -48,3 +54,33 @@ def format_age(dt: datetime | None) -> str:
     if minutes == 1:
         return "1 minute ago"
     return "just now"
+
+
+def cache_entries_table(
+    entries: Iterable[CacheEntry],
+    *,
+    include_key: bool = False,
+) -> Table:
+    """Build a Rich table for cached environments."""
+    table = Table(show_edge=False, pad_edge=False)
+    if include_key:
+        table.add_column("Environment", style="bold")
+        table.add_column("Tool")
+    else:
+        table.add_column("Tool", style="bold")
+    table.add_column("Size", justify="right")
+    table.add_column("Last used")
+    table.add_column("Packages", justify="right")
+
+    for entry in entries:
+        row = [
+            format_size(entry.size),
+            format_age(entry.last_modified),
+            str(entry.package_count),
+        ]
+        if include_key:
+            table.add_row(escape(entry.key), escape(entry.tool), *row)
+        else:
+            table.add_row(escape(entry.tool), *row)
+
+    return table
