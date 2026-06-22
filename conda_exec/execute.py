@@ -13,6 +13,8 @@ from conda.core import prefix_data
 from conda.exceptions import InvalidMatchSpec
 from conda.models.match_spec import MatchSpec
 from packaging.specifiers import InvalidSpecifier, SpecifierSet
+from rich.console import Console
+from rich.markup import escape
 
 from . import binaries, run, script
 from .cache import CacheManager
@@ -42,18 +44,19 @@ def strip_tool_separator(args: Namespace) -> list[str]:
 
 def print_exec_error(exc: CondaExecError) -> None:
     """Print a CondaExecError with its hints to stderr."""
-    print(f"conda exec: {exc.error_message}", file=sys.stderr)
+    console = Console(stderr=True, highlight=False)
+    console.print(f"[bold red]conda exec:[/bold red] {escape(exc.error_message)}")
     for hint in exc.hints:
-        print(f"  hint: {hint}", file=sys.stderr)
+        console.print(f"  [bold cyan]hint:[/bold cyan] {escape(hint)}")
 
 
 def print_created_message(label: str, start_time: float) -> None:
     """Print a creation timing message to stderr."""
     elapsed = time.monotonic() - start_time
-    print(
-        f"Creating environment for {label}... done ({elapsed:.1f}s)",
-        file=sys.stderr,
-        flush=True,
+    Console(stderr=True, highlight=False).print(
+        f"[bold blue]Creating[/bold blue] environment for "
+        f"[bold]{escape(label)}[/bold][dim]...[/dim] done "
+        f"[dim]({elapsed:.1f}s)[/dim]",
     )
 
 
@@ -225,7 +228,9 @@ def execute_script(args: Namespace, script_path: Path) -> int:
                 lock_path = script_path
             else:
                 lock_path = locks.write_sidecar(script_path, lock_content)
-            print(f"Wrote lock data to {lock_path}", file=sys.stderr)
+            Console(stderr=True, highlight=False, width=4096).print(
+                f"Wrote lock data to [dim]{escape(str(lock_path))}[/dim]"
+            )
 
         if metadata and metadata.requires_python:
             check_requires_python(prefix, metadata.requires_python)
@@ -292,10 +297,9 @@ def run_existing_lock(
     except ScriptLockError as exc:
         if metadata is None:
             raise
-        print(
-            f"conda exec: warning: ignoring unusable "
-            f"{script_lock.source} lock data: {exc.error_message}",
-            file=sys.stderr,
+        Console(stderr=True, highlight=False).print(
+            "[bold yellow]conda exec: warning:[/bold yellow] ignoring unusable "
+            f"{escape(script_lock.source)} lock data: {escape(exc.error_message)}"
         )
         return None
 

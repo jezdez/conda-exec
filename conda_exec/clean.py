@@ -47,14 +47,16 @@ def execute_clean(args: Namespace, *, console: Console | None = None) -> int:
 
     if dry_run:
         console.print(
-            f"Would remove {len(to_remove)} environment(s) ({format_size(total_size)}):"
+            f"[bold yellow]Would remove[/bold yellow] {len(to_remove)} "
+            f"environment(s) [dim]({format_size(total_size)})[/dim]:"
         )
         console.print(cache_entries_table(to_remove, include_key=True))
         return 0
 
     if not args.yes:
         console.print(
-            f"Will remove {len(to_remove)} environment(s) ({format_size(total_size)}):"
+            f"[bold yellow]Will remove[/bold yellow] {len(to_remove)} "
+            f"environment(s) [dim]({format_size(total_size)})[/dim]:"
         )
         console.print(cache_entries_table(to_remove, include_key=True))
         try:
@@ -68,6 +70,7 @@ def execute_clean(args: Namespace, *, console: Console | None = None) -> int:
         console.print(f"Removed [bold]{escape(key)}[/bold]")
 
     console.print(
-        f"Cleaned {result.removed_count} environment(s) ({format_size(total_size)})."
+        f"[bold cyan]Cleaned[/bold cyan] {result.removed_count} "
+        f"environment(s) [dim]({format_size(total_size)})[/dim]."
     )
     return 0
