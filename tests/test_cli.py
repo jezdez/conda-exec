@@ -85,6 +85,13 @@ def test_parse_multiple_channels(parser: ArgumentParser):
     assert args.channels == ["bioconda", "defaults"]
 
 
+def test_parser_help_describes_clean_age_and_all(parser: ArgumentParser):
+    help_text = " ".join(parser.format_help().split())
+    assert "older than --older-than days" in help_text
+    assert "use --all to remove every cached environment" in help_text
+    assert "Remove all cached environments, regardless of age" in help_text
+
+
 def test_parse_with_specs(parser: ArgumentParser):
     args = parser.parse_args(["--with", "pytest", "--with", "python=3.12", "ruff"])
     assert args.with_specs == ["pytest", "python=3.12"]

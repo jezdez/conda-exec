@@ -83,7 +83,10 @@ def configure_parser(parser: ArgumentParser) -> None:
         action="store_true",
         default=False,
         dest="clean_mode",
-        help="Remove cached environments.",
+        help=(
+            "Remove cached environments older than --older-than days "
+            "(use --all to remove every cached environment)."
+        ),
     )
 
     channel_action = parser.add_argument(
@@ -167,7 +170,7 @@ def configure_parser(parser: ArgumentParser) -> None:
         action="store_true",
         default=False,
         dest="remove_all",
-        help="Remove all cached environments (only with --clean).",
+        help="Remove all cached environments, regardless of age (only with --clean).",
     )
     parser.add_argument(
         "--older-than",
