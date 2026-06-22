@@ -33,7 +33,11 @@ def execute_clean(args: Namespace) -> int:
     )
 
     if not to_remove:
-        print("Nothing to clean.")
+        print(
+            "Nothing to clean. By default, --clean only removes cached "
+            f"environments unused for more than {args.older_than} days; "
+            "use --all to remove every cached environment."
+        )
         return 0
 
     total_size = sum(entry.size for entry in to_remove)
